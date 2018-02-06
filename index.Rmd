@@ -1,5 +1,10 @@
 ---
-title: "Website for Data Analytics"
+title: "Scott Reeves"
 ---
 
-Hello, Website!
+## R for Data Science
+Integrated content and exercises, with plots and output.
+
+Printed ver. | Check it out
+-------------|---------------
+Chapter 1    | [Data Visualization with ggplot2](./r4ds/Chapter1.html)
