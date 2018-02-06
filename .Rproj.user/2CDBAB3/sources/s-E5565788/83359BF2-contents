@@ -1,9 +1,0 @@
-name: "Scott Reeves Website"
-output_dir: "."
-navbar:
-  title: "For the love of data"
-  left:
-    - text: "Home"
-      href: index.html
-    - text: "About"
-      href: about.html
