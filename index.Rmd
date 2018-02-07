@@ -1,8 +1,11 @@
 ---
 title: "Scott Reeves"
+output: html_document
 ---
 
-## R for Data Science
+***
+
+#### R for Data Science
 Integrated content and exercises, with plots and output.
 
 Printed ver. | Check it out
