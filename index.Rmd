@@ -1,6 +1,9 @@
 ---
 title: "Scott Reeves"
-output: html_document
+output: 
+  html_document:
+    theme: flatly
+    #highlight: tango
 ---
 
 ***
