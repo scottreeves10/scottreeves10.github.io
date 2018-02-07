@@ -472,14 +472,29 @@ parse_datetime(&quot;20101010&quot;)</code></pre>
 <li><p><code>parse_date()</code> expects a four digit year, a <code>-</code> or <code>/</code>, the month, a <code>-</code> or <code>/</code>, then the day:</p>
 <pre class="r"><code>parse_date(&quot;2010-10-01&quot;)</code></pre>
 <pre><code>#&gt; [1] &quot;2010-10-01&quot;</code></pre></li>
-<li><p><code>parse_time()</code> expects the hour, <code>:</code>, minutes, optionally <code>:</code> and seconds, and an optional am/pm specifier:</p>
-<pre class="r"><code>library(hms)
-parse_time(&quot;01:10 am&quot;)</code></pre>
-<pre><code>#&gt; 01:10:00</code></pre>
-<pre class="r"><code>parse_time(&quot;20:10:01&quot;)</code></pre>
-<pre><code>#&gt; 20:10:01</code></pre>
-<p>Base R doesn’t have a great built in class for time data, so we use the one provided in the hms package.</p></li>
+<li><p><code>parse_time()</code> expects the hour, <code>:</code>, minutes, optionally <code>:</code> and seconds, and an optional am/pm specifier:</p></li>
 </ul>
+<div id="libraryhms" class="section level4">
+<h4>library(hms)</h4>
+<pre><code>```r
+library(hms)
+parse_time(&quot;01:10 am&quot;)
+```
+
+```
+#&gt; 01:10:00
+```
+
+```r
+parse_time(&quot;20:10:01&quot;)
+```
+
+```
+#&gt; 20:10:01
+```
+
+Base R doesn't have a great built in class for time data, so we use 
+the one provided in the hms package.</code></pre>
 <p>If these defaults don’t work for your data you can supply your own date-time <code>format</code>, built up of the following pieces:</p>
 <dl>
 <dt>Year</dt>
@@ -533,22 +548,26 @@ parse_time(&quot;01:10 am&quot;)</code></pre>
 <pre class="r"><code>parse_date(&quot;1 janvier 2015&quot;, &quot;%d %B %Y&quot;, locale = locale(&quot;fr&quot;))</code></pre>
 <pre><code>#&gt; [1] &quot;2015-01-01&quot;</code></pre>
 </div>
+</div>
 <div id="exercises-1" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
 <li><p>What are the most important arguments to <code>locale()</code>?</p>
-<ul>
-<li>When parsing numbers, the most important option is the character you use for the decimal mark. Next would be grouping_mark.</li>
-</ul></li>
+<p>When parsing numbers, the most important option is the character you use for the decimal mark. Next would be grouping_mark.</p></li>
 <li><p>What happens if you try and set <code>decimal_mark</code> and <code>grouping_mark</code> to the same character? What happens to the default value of <code>grouping_mark</code> when you set <code>decimal_mark</code> to “,”? What happens to the default value of <code>decimal_mark</code> when you set the <code>grouping_mark</code> to “.”?</p>
-<p>Try and set <code>decimal_mark</code> and <code>grouping_mark</code> to the same character: - the fractional digits become part of the whole</p></li>
-</ol>
-<pre class="r"><code>parse_number(&quot;123,456,789,28&quot;, locale = locale(grouping_mark = &quot;,&quot;), (decimal_mark = &quot;,&quot;))</code></pre>
+<pre class="r"><code># When `decimal_mark` and `grouping_mark` to the same character the fractional
+# digits become part of the whole
+# 
+parse_number(&quot;123,456,789,28&quot;, locale = locale(grouping_mark = &quot;,&quot;), (decimal_mark = &quot;,&quot;))</code></pre>
 <pre><code>#&gt; [1] 12345678928</code></pre>
-<p>If <code>decimal_mark</code> is set to “,”, then it appears <code>grouping_mark</code> is ignored.</p>
-<pre class="r"><code>parse_number(&quot;123,456,789,28&quot;, locale = locale(decimal_mark = &quot;,&quot;))</code></pre>
+<pre class="r"><code># If `decimal_mark` is set to &quot;,&quot;, then `grouping_mark` is superceded.
+# 
+parse_number(&quot;123,456,789,28&quot;, locale = locale(decimal_mark = &quot;,&quot;))</code></pre>
 <pre><code>#&gt; [1] 123.456</code></pre>
-<ol style="list-style-type: decimal">
+<pre class="r"><code># If `grouping_mark` is set to &quot;.&quot;, then `decimal_mark` is superceded.
+# 
+parse_number(&quot;123,456,789.28&quot;, locale = locale(grouping_mark = &quot;.&quot;))</code></pre>
+<pre><code>#&gt; [1] 123.456</code></pre></li>
 <li><p>I didn’t discuss the <code>date_format</code> and <code>time_format</code> options to <code>locale()</code>. What do they do? Construct an example that shows when they might be useful.</p></li>
 <li><p>If you live outside the US, create a new locale object that encapsulates the settings for the types of file you read most commonly.</p></li>
 <li><p>What’s the difference between <code>read_csv()</code> and <code>read_csv2()</code>?</p></li>
