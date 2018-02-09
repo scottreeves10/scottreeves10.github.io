@@ -15,5 +15,5 @@ Integrated content and exercises, with plots and output.
 Printed version | Part  | Check it out
 ----------------|-------|----------------------------------------
 Chapter 1 | I. Explore  | [Data Visualization with ggplot2](./r4ds/Chapter_01.html)
-Chapter 3 | I. Explore  | [Data Transformation with dyplyr](.rf4s/Chapter_03.html)
+Chapter 3 | I. Explore  | [Data Transformation with dyplyr](.r4ds/Chapter_03.html)
 Chapter 8 | II. Wrangle | [Data Import with readr](./r4ds/Chapter_08.html)
