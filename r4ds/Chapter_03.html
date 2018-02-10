@@ -130,11 +130,14 @@ $(document).ready(function () {
 <div id="prerequisites" class="section level3">
 <h3>Prerequisites</h3>
 <p>In this chapter we’re going to focus on how to use the dplyr package, another core member of the tidyverse. We’ll illustrate the key ideas using data from the nycflights13 package, and use ggplot2 to help us understand the data.</p>
+<div id="libraries" class="section level4">
+<h4>Libraries</h4>
 <pre class="text"><code>library(nycflights13)
 library(tidyverse)
 library(dplyr)
 library(ggplot2)</code></pre>
 <p>Take careful note of the conflicts message that’s printed when you load the tidyverse. It tells you that dplyr overwrites some functions in base R. If you want to use the base version of these functions after loading dplyr, you’ll need to use their full names: <code>stats::filter()</code> and <code>stats::lag()</code>.</p>
+</div>
 </div>
 <div id="nycflights13" class="section level3">
 <h3>nycflights13</h3>
@@ -188,8 +191,8 @@ library(ggplot2)</code></pre>
 <p>Together these properties make it easy to chain together multiple simple steps to achieve a complex result. Let’s dive in and see how these verbs work.</p>
 </div>
 </div>
-<div id="filter-rows-with-filter" class="section level2">
-<h2>Filter rows with <code>filter()</code></h2>
+<div id="filter" class="section level2">
+<h2>Filter() - Filter rows with <code>filter()</code></h2>
 <p><code>filter()</code> allows you to subset observations based on their values. The first argument is the name of the data frame. The second and subsequent arguments are the expressions that filter the data frame. For example, we can select all flights on January 1st with:</p>
 <pre class="text"><code>filter(flights, month == 1, day == 1)
 #&gt; # A tibble: 842 x 19
@@ -233,11 +236,14 @@ library(ggplot2)</code></pre>
 #&gt; [1] FALSE</code></pre>
 <pre class="text"><code>1/49 * 49 == 1
 #&gt; [1] FALSE</code></pre>
+<div id="near-sqrt" class="section level5">
+<h5>near(), sqrt()</h5>
 <p>Computers use finite precision arithmetic (they obviously can’t store an infinite number of digits!) so remember that every number you see is an approximation. Instead of relying on <code>==</code>, use <code>near()</code>:</p>
 <pre class="text"><code>near(sqrt(2) ^ 2,  2)
 #&gt; [1] TRUE</code></pre>
 <pre class="text"><code>near(1 / 49 * 49, 1)
 #&gt; [1] TRUE</code></pre>
+</div>
 </div>
 <div id="logical-operators" class="section level3">
 <h3>Logical operators</h3>
@@ -284,6 +290,8 @@ y &lt;- NA
 x == y
 #&gt; [1] NA</code></pre>
 <pre class="text"><code># We don't know!</code></pre>
+<div id="is.na" class="section level5">
+<h5>is.na()</h5>
 <p>If you want to determine if a value is missing, use <code>is.na()</code>:</p>
 <pre class="text"><code>is.na(x)
 #&gt; [1] TRUE</code></pre>
@@ -300,6 +308,7 @@ filter(df, x &gt; 1)
 #&gt;   &lt;dbl&gt;
 #&gt; 1    NA
 #&gt; 2     3</code></pre>
+</div>
 </div>
 <div id="exercises" class="section level3">
 <h3>Exercises</h3>
@@ -325,6 +334,10 @@ filter(flights, carrier %in% c(&quot;AA&quot;, &quot;UA&quot;, &quot;DL&quot;))<
 <li><p>Departed between midnight and 6am (inclusive)</p>
 <pre class="text"><code>filter(flights, dep_time &gt;= 0000 &amp; dep_time &lt;= 0600)</code></pre></li>
 </ol></li>
+</ol>
+<div id="between" class="section level5">
+<h5>between()</h5>
+<ol style="list-style-type: decimal">
 <li><p>Another useful dplyr filtering helper is <code>between()</code>. What does it do? Can you use it to simplify the code needed to answer the previous challenges?</p>
 <pre class="text"><code>filter(flights, between(dep_time, 0000, 0600))</code></pre></li>
 <li><p>How many flights have a missing <code>dep_time</code>? What other variables are missing? What might these rows represent?</p>
@@ -348,8 +361,9 @@ NA * 0
 </ol>
 </div>
 </div>
-<div id="arrange-rows-with-arrange" class="section level2">
-<h2>Arrange rows with <code>arrange()</code></h2>
+</div>
+<div id="arrange---arrange-rows-with-arrange" class="section level2">
+<h2>Arrange() - Arrange rows with <code>arrange()</code></h2>
 <p><code>arrange()</code> works similarly to <code>filter()</code> except that instead of selecting rows, it changes their order. It takes a data frame and a set of column names (or more complicated expressions) to order by. If you provide more than one column name, each additional column will be used to break ties in the values of preceding columns:</p>
 <pre class="text"><code>arrange(flights, year, month, day)
 #&gt; # A tibble: 336,776 x 19
@@ -410,7 +424,7 @@ arrange(flights, dep_delay)
 <pre class="text"><code>arrange(flights, air_time)
 select(arrange(flights, air_time), flight, month, day, year, air_time)
 </code></pre></li>
-<li><p>Which flights travelled the longest? Which travelled the shortest?</p>
+<li><p>Which flights traveled the longest? Which traveled the shortest?</p>
 <pre class="text"><code>select(arrange(flights, desc(air_time)), flight, month, day, year, air_time) 
 select(arrange(flights, air_time), flight, month, day, year, air_time)
 </code></pre></li>
@@ -418,7 +432,7 @@ select(arrange(flights, air_time), flight, month, day, year, air_time)
 </div>
 </div>
 <div id="select" class="section level2">
-<h2>Select columns with <code>select()</code></h2>
+<h2>Select() - Select columns with <code>select()</code></h2>
 <p>It’s not uncommon to get datasets with hundreds or even thousands of variables. In this case, the first challenge is often narrowing in on the variables you’re actually interested in. <code>select()</code> allows you to rapidly zoom in on a useful subset using operations based on the names of the variables.</p>
 <p><code>select()</code> is not terribly useful with the flights data because we only have 19 variables, but you can still get the general idea:</p>
 <pre class="text"><code># Select columns by name
@@ -459,6 +473,8 @@ select(flights, -(year:day))
 #&gt; # ... with 3.368e+05 more rows, and 10 more variables: carrier &lt;chr&gt;,
 #&gt; #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;,
 #&gt; #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+<div id="starts_with-ends_with-contains-matches-num_range-one_of" class="section level4">
+<h4>starts_with(), ends_with(), contains(), matches(), num_range(), one_of()</h4>
 <p>There are a number of helper functions you can use within <code>select()</code>:</p>
 <ul>
 <li><p><code>starts_with(&quot;abc&quot;)</code>: matches names that begin with “abc”.</p></li>
@@ -468,9 +484,9 @@ select(flights, -(year:day))
 <li><p><code>num_range(&quot;x&quot;, 1:3)</code> matches <code>x1</code>, <code>x2</code> and <code>x3</code>.</p></li>
 </ul>
 <p>See <code>?select</code> for more details.</p>
-<p><code>select()</code> can be used to rename variables, but it’s rarely useful because it drops all of the variables not explicitly mentioned. Instead, use <strong><code>rename()</code></strong>, which is a variant of <code>select()</code> that keeps all the variables that aren’t explicitly mentioned:</p>
 <div id="rename" class="section level5">
 <h5>rename()</h5>
+<p><code>select()</code> can be used to rename variables, but it’s rarely useful because it drops all of the variables not explicitly mentioned. Instead, use <strong><code>rename()</code></strong>, which is a variant of <code>select()</code> that keeps all the variables that aren’t explicitly mentioned:</p>
 <pre class="text"><code>rename(flights, tail_num = tailnum) # new = old
 #&gt; # A tibble: 336,776 x 19
 #&gt;    year month   day dep_time sched_dep_time dep_delay arr_time
@@ -485,6 +501,9 @@ select(flights, -(year:day))
 #&gt; #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;,
 #&gt; #   tail_num &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;,
 #&gt; #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+</div>
+<div id="everything" class="section level5">
+<h5>everything()</h5>
 <p>Another option is to use <code>select()</code> in conjunction with the <code>everything()</code> helper. This is useful if you have a handful of variables you’d like to <strong>move to the start of the data frame</strong>.</p>
 <pre class="text"><code>select(flights, time_hour, air_time, everything())
 #&gt; # A tibble: 336,776 x 19
@@ -500,6 +519,7 @@ select(flights, -(year:day))
 #&gt; #   arr_time &lt;int&gt;, sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
 #&gt; #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;, distance &lt;dbl&gt;,
 #&gt; #   hour &lt;dbl&gt;, minute &lt;dbl&gt;</code></pre>
+</div>
 </div>
 <div id="exercises-2" class="section level3">
 <h3>Exercises</h3>
@@ -547,17 +567,19 @@ Yes, it is a surprise that helpers are not case sensitive. How do the select hel
 </ol>
 </div>
 </div>
-<div id="add-new-variables-with-mutate" class="section level2">
-<h2>Add new variables with <code>mutate()</code></h2>
+<div id="mutate" class="section level2">
+<h2>Mutate() - Add new variables with <code>mutate()</code></h2>
 <p>Besides selecting sets of existing columns, it’s often useful to add new columns that are functions of existing columns. That’s the job of <code>mutate()</code>.</p>
 <p><code>mutate()</code> always adds new columns at the end of your dataset so we’ll start by creating a narrower dataset so we can see the new variables. Remember that when you’re in RStudio, the easiest way to see all the columns is <code>View()</code>.</p>
+<div id="flight_sml" class="section level5">
+<h5>flight_sml ***</h5>
 <pre class="text"><code>flights_sml &lt;- select(flights, 
   year:day, 
   ends_with(&quot;delay&quot;), 
   distance, 
   air_time
-)
-mutate(flights_sml,
+)</code></pre>
+<pre class="text"><code>mutate(flights_sml,
   gain = arr_delay - dep_delay,
   speed = distance / air_time * 60
 )
@@ -587,6 +609,9 @@ mutate(flights_sml,
 #&gt; 5  2013     1     1        -6       -25      762      116   -19 1.933333
 #&gt; 6  2013     1     1        -4        12      719      150    16 2.500000
 #&gt; # ... with 3.368e+05 more rows, and 1 more variables: gain_per_hour &lt;dbl&gt;</code></pre>
+</div>
+<div id="transmute" class="section level5">
+<h5>transmute()</h5>
 <p>If you only want to keep the new variables, use <code>transmute()</code>:</p>
 <pre class="text"><code>transmute(flights,
   gain = arr_delay - dep_delay,
@@ -603,12 +628,20 @@ mutate(flights_sml,
 #&gt; 5   -19 1.933333     -9.827586
 #&gt; 6    16 2.500000      6.400000
 #&gt; # ... with 3.368e+05 more rows</code></pre>
+</div>
 <div id="mutate-funs" class="section level3">
 <h3>Useful creation functions</h3>
 <p>There are many functions for creating new variables that you can use with <code>mutate()</code>. The key property is that the function must be vectorised: it must take a vector of values as input, return a vector with the same number of values as output. There’s no way to list every possible function that you might use, but here’s a selection of functions that are frequently useful:</p>
+<div id="arithmetic-operators" class="section level5">
+<h5>Arithmetic operators</h5>
 <ul>
 <li><p>Arithmetic operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>. These are all vectorised, using the so called “recycling rules”. If one parameter is shorter than the other, it will be automatically extended to be the same length. This is most useful when one of the arguments is a single number: <code>air_time / 60</code>, <code>hours * 60 + minute</code>, etc.</p>
 <p>Arithmetic operators are also useful in conjunction with the aggregate functions you’ll learn about later. For example, <code>x / sum(x)</code> calculates the proportion of a total, and <code>y - mean(y)</code> computes the difference from the mean.</p></li>
+</ul>
+</div>
+<div id="modular-arithmetic" class="section level5">
+<h5>Modular arithmetic</h5>
+<ul>
 <li><p>Modular arithmetic: <code>%/%</code> (integer division) and <code>%%</code> (remainder), where <code>x == y * (x %/% y) + (x %% y)</code>. Modular arithmetic is a handy tool because it allows you to break integers up into pieces. For example, in the flights dataset, you can compute <code>hour</code> and <code>minute</code> from <code>dep_time</code> with:</p>
 <pre class="text"><code>transmute(flights,
   dep_time,
@@ -625,8 +658,18 @@ mutate(flights_sml,
 #&gt; 5      554     5     54
 #&gt; 6      554     5     54
 #&gt; # ... with 3.368e+05 more rows</code></pre></li>
+</ul>
+</div>
+<div id="logs-log-log2-log10" class="section level5">
+<h5>Logs: <code>log()</code>, <code>log2()</code>, <code>log10()</code></h5>
+<ul>
 <li><p>Logs: <code>log()</code>, <code>log2()</code>, <code>log10()</code>. Logarithms are an incredibly useful transformation for dealing with data that ranges across multiple orders of magnitude. They also convert multiplicative relationships to additive, a feature we’ll come back to in modelling.</p>
 <p>All else being equal, I recommend using <code>log2()</code> because it’s easy to interpret: a difference of 1 on the log scale corresponds to doubling on the original scale and a difference of -1 corresponds to halving.</p></li>
+</ul>
+</div>
+<div id="offsets-lead-and-lag" class="section level5">
+<h5>Offsets: <code>lead()</code> and <code>lag()</code></h5>
+<ul>
 <li><p>Offsets: <code>lead()</code> and <code>lag()</code> allow you to refer to leading or lagging values. This allows you to compute running differences (e.g. <code>x - lag(x)</code>) or find when values change (<code>x != lag(x))</code>. They are most useful in conjunction with <code>group_by()</code>, which you’ll learn about shortly.</p>
 <pre class="text"><code>(x &lt;- 1:10)
 #&gt;  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
@@ -634,6 +677,11 @@ mutate(flights_sml,
 #&gt;  [1] NA  1  2  3  4  5  6  7  8  9</code></pre>
 <pre class="text"><code>lead(x)
 #&gt;  [1]  2  3  4  5  6  7  8  9 10 NA</code></pre></li>
+</ul>
+</div>
+<div id="cumulative-and-rolling-aggregates-cumsum-cumprod-cummin-cummax-cummean" class="section level5">
+<h5>Cumulative and rolling aggregates: <code>cumsum()</code>, <code>cumprod()</code>, <code>cummin()</code>, <code>cummax()</code>, <code>cummean()</code></h5>
+<ul>
 <li><p>Cumulative and rolling aggregates: R provides functions for running sums, products, mins and maxes: <code>cumsum()</code>, <code>cumprod()</code>, <code>cummin()</code>, <code>cummax()</code>; and dplyr provides <code>cummean()</code> for cumulative means. If you need rolling aggregates (i.e. a sum computed over a rolling window), try the RcppRoll package.</p>
 <pre class="text"><code>x
 #&gt;  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
@@ -658,6 +706,7 @@ min_rank(y)
 <pre class="text"><code>cume_dist(y)
 #&gt; [1] 0.2 0.6 0.6  NA 0.8 1.0</code></pre></li>
 </ul>
+</div>
 </div>
 <div id="exercises-3" class="section level3">
 <h3>Exercises</h3>
@@ -730,8 +779,8 @@ head(min_rank(desc(x)), 10)
 </ol>
 </div>
 </div>
-<div id="grouped-summaries-with-summarise" class="section level2">
-<h2>Grouped summaries with <code>summarise()</code></h2>
+<div id="summarize---grouped-summaries-with-summarise" class="section level2">
+<h2>Summarize() - Grouped summaries with <code>summarise()</code></h2>
 <p>The last key verb is <code>summarise()</code>. It collapses a data frame to a single row:</p>
 <pre class="text"><code>summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
 #&gt; # A tibble: 1 x 1
@@ -739,6 +788,8 @@ head(min_rank(desc(x)), 10)
 #&gt;      &lt;dbl&gt;
 #&gt; 1 12.63907</code></pre>
 <p>(We’ll come back to what that <code>na.rm = TRUE</code> means very shortly.)</p>
+<div id="group_by" class="section level3">
+<h3>group_by()</h3>
 <p><code>summarise()</code> is not terribly useful unless we pair it with <code>group_by()</code>. This changes the unit of analysis from the complete dataset to individual groups. Then, when you use the dplyr verbs on a grouped data frame they’ll be automatically applied “by group”. For example, if we applied exactly the same code to a data frame grouped by date, we get the average delay per date:</p>
 <pre class="text"><code>by_day &lt;- group_by(flights, year, month, day)
 summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
@@ -754,8 +805,9 @@ summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
 #&gt; 6  2013     1     6  7.148014
 #&gt; # ... with 359 more rows</code></pre>
 <p>Together <code>group_by()</code> and <code>summarise()</code> provide one of the tools that you’ll use most commonly when working with dplyr: grouped summaries. But before we go any further with this, we need to introduce a powerful new idea: the pipe.</p>
-<div id="combining-multiple-operations-with-the-pipe" class="section level3">
-<h3>Combining multiple operations with the pipe</h3>
+</div>
+<div id="pipe-combining-multiple-operations-with-the-pipe" class="section level3">
+<h3>Pipe %&gt;% Combining multiple operations with the pipe</h3>
 <p>Imagine that we want to explore the relationship between the distance and average delay for each location. Using what you know about dplyr, you might write code like this:</p>
 <pre class="text"><code>by_dest &lt;- group_by(flights, dest)
 delay &lt;- summarise(by_dest,
@@ -776,7 +828,7 @@ ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
 <p>There are three steps to prepare this data:</p>
 <ol style="list-style-type: decimal">
 <li><p>Group flights by destination.</p></li>
-<li><p>Summarise to compute distance, average delay, and number of flights.</p></li>
+<li><p>Summarize to compute distance, average delay, and number of flights.</p></li>
 <li><p>Filter to remove noisy points and Honolulu airport, which is almost twice as far away as the next closest airport.</p></li>
 </ol>
 <p>This code is a little frustrating to write because we have to give each intermediate data frame a name, even though we don’t care about it. Naming things is hard, so this slows down our analysis.</p>
@@ -789,7 +841,7 @@ ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
     delay = mean(arr_delay, na.rm = TRUE)
   ) %&gt;% 
   filter(count &gt; 20, dest != &quot;HNL&quot;)</code></pre>
-<p>This focuses on the transformations, not what’s being transformed, which makes the code easier to read. You can read it as a series of imperative statements: group, then summarise, then filter. As suggested by this reading, a good way to pronounce <code>%&gt;%</code> when reading code is “then”.</p>
+<p>This focuses on the transformations, not what’s being transformed, which makes the code easier to read. You can read it as a series of imperative statements: group, then summarize, then filter. As suggested by this reading, a good way to pronounce <code>%&gt;%</code> when reading code is “then”.</p>
 <p>Behind the scenes, <code>x %&gt;% f(y)</code> turns into <code>f(x, y)</code>, and <code>x %&gt;% f(y) %&gt;% g(z)</code> turns into <code>g(f(x, y), z)</code> and so on. You can use the pipe to rewrite multiple operations in a way that you can read left-to-right, top-to-bottom. We’ll use piping frequently from now on because it considerably improves the readability of code, and we’ll come back to it in more detail in [pipes].</p>
 <p>Working with the pipe is one of the key criteria for belonging to the tidyverse. The only exception is ggplot2: it was written before the pipe was discovered. Unfortunately, the next iteration of ggplot2, ggvis, which does use the pipe, isn’t quite ready for prime time yet.</p>
 </div>
@@ -810,7 +862,7 @@ ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
 #&gt; 5  2013     1     5    NA
 #&gt; 6  2013     1     6    NA
 #&gt; # ... with 359 more rows</code></pre>
-<p>We get a lot of missing values! That’s because aggregation functions obey the usual rule of missing values: if there’s any missing value in the input, the output will be a missing value. Fortunately, all aggregation functions have an <code>na.rm</code> argument which removes the missing values prior to computation:</p>
+<p>We get a lot of missing values! That’s because aggregation functions obey the usual rule of missing values: if there’s any missing value in the input, the output will be a missing value. Fortunately, <em>all aggregation functions have an <code>na.rm</code> argument</em> which removes the missing values prior to computation:</p>
 <pre class="text"><code>flights %&gt;% 
   group_by(year, month, day) %&gt;% 
   summarise(mean = mean(dep_delay, na.rm = TRUE))
@@ -826,9 +878,11 @@ ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
 #&gt; 6  2013     1     6  7.148014
 #&gt; # ... with 359 more rows</code></pre>
 <p>In this case, where missing values represent cancelled flights, we could also tackle the problem by first removing the cancelled flights. We’ll save this dataset so we can reuse in the next few examples.</p>
+<div id="not_cancelled" class="section level5">
+<h5>not_cancelled ***</h5>
 <pre class="text"><code>not_cancelled &lt;- flights %&gt;% 
-  filter(!is.na(dep_delay), !is.na(arr_delay))
-
+  filter(!is.na(dep_delay), !is.na(arr_delay))</code></pre>
+<pre class="text"><code>
 not_cancelled %&gt;% 
   group_by(year, month, day) %&gt;% 
   summarise(mean = mean(dep_delay))
@@ -844,8 +898,11 @@ not_cancelled %&gt;%
 #&gt; 6  2013     1     6  7.145959
 #&gt; # ... with 359 more rows</code></pre>
 </div>
+</div>
 <div id="counts" class="section level3">
 <h3>Counts</h3>
+<div id="n-sumis.nax" class="section level5">
+<h5>n(), sum(!is.na(x))</h5>
 <p>Whenever you do any aggregation, it’s always a good idea to include either a count (<code>n()</code>), or a count of non-missing values (<code>sum(!is.na(x))</code>). That way you can check that you’re not drawing conclusions based on very small amounts of data. For example, let’s look at the planes (identified by their tail number) that have the highest average delays:</p>
 <pre class="text"><code>delays &lt;- not_cancelled %&gt;% 
   group_by(tailnum) %&gt;% 
@@ -916,9 +973,12 @@ batters %&gt;%
 #&gt; # ... with 1.891e+04 more rows</code></pre>
 <p>You can find a good explanation of this problem at <a href="http://varianceexplained.org/r/empirical_bayes_baseball/" class="uri">http://varianceexplained.org/r/empirical_bayes_baseball/</a> and <a href="http://www.evanmiller.org/how-not-to-sort-by-average-rating.html" class="uri">http://www.evanmiller.org/how-not-to-sort-by-average-rating.html</a>.</p>
 </div>
+</div>
 <div id="summarise-funs" class="section level3">
 <h3>Useful summary functions</h3>
 <p>Just using means, counts, and sum can get you a long way, but R provides many other useful summary functions:</p>
+<div id="mean-median" class="section level5">
+<h5>mean(), median()</h5>
 <ul>
 <li><p>Measures of location: we’ve used <code>mean(x)</code>, but <code>median(x)</code> is also useful. The mean is the sum divided by the length; the median is a value where 50% of <code>x</code> is above it, and 50% is below it.</p>
 <p>It’s sometimes useful to combine aggregation with logical subsetting. We haven’t talked about this sort of subsetting yet, but you’ll learn more about it in [subsetting].</p>
@@ -939,6 +999,11 @@ batters %&gt;%
 #&gt; 5  2013     1     5  -1.525802   22.55882
 #&gt; 6  2013     1     6   4.236429   24.37270
 #&gt; # ... with 359 more rows</code></pre></li>
+</ul>
+</div>
+<div id="sd-iqr-mad" class="section level5">
+<h5>sd(), IQR(), mad()</h5>
+<ul>
 <li><p>Measures of spread: <code>sd(x)</code>, <code>IQR(x)</code>, <code>mad(x)</code>. The mean squared deviation, or standard deviation or sd for short, is the standard measure of spread. The interquartile range <code>IQR()</code> and median absolute deviation <code>mad(x)</code> are robust equivalents that may be more useful if you have outliers.</p>
 <pre class="text"><code># Why is distance to some destinations more variable than to others?
 not_cancelled %&gt;% 
@@ -955,6 +1020,11 @@ not_cancelled %&gt;%
 #&gt; 5   SEA    9.977993
 #&gt; 6   LAS    9.907786
 #&gt; # ... with 98 more rows</code></pre></li>
+</ul>
+</div>
+<div id="min-quantile-max" class="section level5">
+<h5>min(), quantile(), max()</h5>
+<ul>
 <li><p>Measures of rank: <code>min(x)</code>, <code>quantile(x, 0.25)</code>, <code>max(x)</code>. Quantiles are a generalisation of the median. For example, <code>quantile(x, 0.25)</code> will find a value of <code>x</code> that is greater than 25% of the values, and less than the remaining 75%.</p>
 <pre class="text"><code># When do the first and last flights leave each day?
 not_cancelled %&gt;% 
@@ -974,6 +1044,11 @@ not_cancelled %&gt;%
 #&gt; 5  2013     1     5    14  2357
 #&gt; 6  2013     1     6    16  2355
 #&gt; # ... with 359 more rows</code></pre></li>
+</ul>
+</div>
+<div id="first-nth-last" class="section level5">
+<h5>first(), nth(), last()</h5>
+<ul>
 <li><p>Measures of position: <code>first(x)</code>, <code>nth(x, 2)</code>, <code>last(x)</code>. These work similarly to <code>x[1]</code>, <code>x[2]</code>, and <code>x[length(x)]</code> but let you set a default value if that position does not exist (i.e. you’re trying to get the 3rd element from a group that only has two elements). For example, we can find the first and last departure for each day:</p>
 <pre class="text"><code>not_cancelled %&gt;% 
   group_by(year, month, day) %&gt;% 
@@ -1011,6 +1086,11 @@ not_cancelled %&gt;%
 #&gt; #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
 #&gt; #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
 #&gt; #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, r &lt;int&gt;</code></pre></li>
+</ul>
+</div>
+<div id="n-sumis.na-n_distinct-count" class="section level5">
+<h5>n(), sum(!is.na()), n_distinct(), count()</h5>
+<ul>
 <li><p>Counts: You’ve seen <code>n()</code>, which takes no arguments, and returns the size of the current group. To count the number of non-missing values, use <code>sum(!is.na(x))</code>. To count the number of distinct (unique) values, use <code>n_distinct(x)</code>.</p>
 <pre class="text"><code># Which destinations have the most carriers?
 not_cancelled %&gt;% 
@@ -1088,9 +1168,12 @@ not_cancelled %&gt;%
 #&gt; # ... with 359 more rows</code></pre></li>
 </ul>
 </div>
+</div>
 <div id="grouping-by-multiple-variables" class="section level3">
 <h3>Grouping by multiple variables</h3>
 <p>When you group by multiple variables, each summary peels off one level of the grouping. That makes it easy to progressively roll up a dataset:</p>
+<div id="daily" class="section level5">
+<h5>daily ***</h5>
 <pre class="text"><code>daily &lt;- group_by(flights, year, month, day)
 (per_day   &lt;- summarise(daily, flights = n()))
 #&gt; # A tibble: 365 x 4
@@ -1121,7 +1204,8 @@ not_cancelled %&gt;%
 #&gt;    year flights
 #&gt;   &lt;int&gt;   &lt;int&gt;
 #&gt; 1  2013  336776</code></pre>
-<p>Be careful when progressively rolling up summaries: it’s OK for sums and counts, but you need to think about weighting means and variances, and it’s not possible to do it exactly for rank-based statistics like the median. In other words, the sum of groupwise sums is the overall sum, but the median of groupwise medians is not the overall median.</p>
+<p><strong>Be careful</strong> when progressively rolling up summaries: it’s OK for sums and counts, but you need to think about weighting means and variances, and it’s not possible to do it exactly for rank-based statistics like the median. In other words, the sum of groupwise sums is the overall sum, but the median of groupwise medians is not the overall median.</p>
+</div>
 </div>
 <div id="ungrouping" class="section level3">
 <h3>Ungrouping</h3>
@@ -1141,7 +1225,8 @@ not_cancelled %&gt;%
 <ul>
 <li>A flight is 15 minutes early 50% of the time, and 15 minutes late 50% of the time.</li>
 </ul>
-<pre class="text"><code># First, I will simply a prototype against some logical numbers:
+<pre class="text"><code># First, let's start with a simple sanity check. Do the results look logical when we look at a summary of number of flights for a given flight(number) and carrier comination as compared to how many of them respectivelty are 15 minutes early or late. 
+# Yes, the results look logical. 
 
 not_cancelled %&gt;%
   group_by(flight, carrier) %&gt;%
@@ -1161,7 +1246,7 @@ not_cancelled %&gt;%
 #&gt; 5      1      WN    30          1        10
 #&gt; 6      2      B6    50          4         6
 #&gt; # ... with 5,700 more rows</code></pre>
-<pre class="text"><code># That works, so now:
+<pre class="text"><code># That works, so now let's look at the results in terms of proportions:
 
 # Limit to at least 20 flights to remove small samples.
 # Group by carrier, flight and destination to eliminate overlapping designations.
@@ -1373,7 +1458,7 @@ not_cancelled %&gt;%
 #&gt;  3rd Qu.:17.00   3rd Qu.:44.00   3rd Qu.:2013-10-01 07:00:00  
 #&gt;  Max.   :23.00   Max.   :59.00   Max.   :2013-12-31 23:00:00  
 #&gt; </code></pre>
-<p>Alternate way to count na’s by column: <a href="https://sebastiansauer.github.io/sum-isna/" class="uri">https://sebastiansauer.github.io/sum-isna/</a></p>
+<p>Out of curiousity: An alternate way to count na’s by column: <a href="https://sebastiansauer.github.io/sum-isna/" class="uri">https://sebastiansauer.github.io/sum-isna/</a></p>
 <pre class="text"><code>flights %&gt;%
   select(everything()) %&gt;%
   summarize_all(funs(sum(is.na(.))))
@@ -1436,8 +1521,8 @@ not_cancelled %&gt;%
 #&gt; 6      MQ      10.44538      10.77473
 #&gt; # ... with 10 more rows</code></pre>
 <pre class="text"><code>
-# Carrier F9 has the worst average arrival delay, being 21.92 minutes
-
+# Carrier F9 has the worst average arrival delay, being 21.92 minutes</code></pre>
+<pre class="text"><code>
 # plot
 plot.data &lt;- not_cancelled %&gt;%
 group_by(carrier) %&gt;%
@@ -1473,7 +1558,9 @@ not_cancelled %&gt;%
 #&gt; 6      EV   TYS         313               41.15016
 #&gt; # ... with 306 more rows</code></pre>
 <pre class="text"><code>
-# UA into STL, but only 2 flights. let's look at sample of 20 or more flights
+# UA into STL, but only 2 flights. </code></pre>
+<pre class="text"><code>
+# let's look at sample of 20 or more flights
 
 not_cancelled %&gt;%
   group_by(carrier, dest) %&gt;%
@@ -1496,8 +1583,8 @@ not_cancelled %&gt;%
 #&gt; # ... with 255 more rows</code></pre>
 <pre class="text"><code>
 # EV into CAE tops the list. In fact carrier EV holds the 6 of the top 7 spots.
-# F9 shows up at number 9 into DEN.
-
+# F9 shows up at number 9 into DEN.</code></pre>
+<pre class="text"><code>
 # which airport has the worst average arrival delay?
 not_cancelled %&gt;%
   group_by(dest) %&gt;%
@@ -1516,8 +1603,8 @@ not_cancelled %&gt;%
 #&gt; 5   TYS         578              24.06920
 #&gt; 6   MSN         556              20.19604
 #&gt; # ... with 98 more rows</code></pre>
-<pre class="text"><code># Indeed CAE has the worst average arrival delay of any destination
-
+<pre class="text"><code># Indeed CAE has the worst average arrival delay of any destination</code></pre>
+<pre class="text"><code>
 # So what might be causing F9 to top the list of carriers with the worst average arrival delay?
 
 not_cancelled %&gt;%
@@ -1534,8 +1621,8 @@ not_cancelled %&gt;%
 #&gt;     &lt;chr&gt; &lt;chr&gt;       &lt;int&gt;                  &lt;dbl&gt;
 #&gt; 1      F9   DEN         681                21.9207</code></pre>
 <pre class="text"><code>
-# Carrier F9 only flies into DEN
-
+# Carrier F9 only flies into DEN</code></pre>
+<pre class="text"><code>
 # What about carrier EV?
 
 not_cancelled %&gt;%
@@ -1558,9 +1645,8 @@ not_cancelled %&gt;%
 #&gt; 6      EV   MKE        1082               23.23660
 #&gt; # ... with 55 more rows</code></pre>
 <pre class="text"><code>
-# EV flies into many destinations where their avg arrival delay is relative very high, however
-# it also flies into 51 more destinations. As yet, we have not compared the delays weighted against
-# number of flights, but let's plot EV's delays per destination.
+# EV flies into many destinations where their avg arrival delay is relative very high, however it also flies into 51 more destinations. </code></pre>
+<pre class="text"><code># As yet, we have not compared the delays weighted against number of flights, but let's plot EV's delays per destination.
 
 not_cancelled %&gt;% 
   group_by(carrier, dest) %&gt;%
@@ -1608,7 +1694,7 @@ not_cancelled %&gt;%
 #&gt; 5   MCO 13967
 #&gt; 6   CLT 13674
 #&gt; # ... with 98 more rows</code></pre>
-<p>Just for fun:</p>
+<p>Out of curiosity, what were the maximum arrival delays at each respective destination … ouch:</p>
 <pre class="text"><code>not_cancelled %&gt;%
   group_by(dest)%&gt;%
   summarize(
@@ -1667,7 +1753,7 @@ popular_dests
 #&gt; #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;,
 #&gt; #   tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;,
 #&gt; #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre></li>
-<li><p>Standardise to compute per group metrics:</p>
+<li><p>Standardize to compute per group metrics:</p>
 <pre class="text"><code>popular_dests %&gt;% 
   filter(arr_delay &gt; 0) %&gt;% 
   mutate(prop_delay = arr_delay / sum(arr_delay)) %&gt;% 
@@ -1689,8 +1775,64 @@ popular_dests
 <div id="exercises-5" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
-<li><p>Refer back to the lists of useful mutate and filtering functions. Describe how each operation changes when you combine it with grouping.</p></li>
-<li><p>Which plane (<code>tailnum</code>) has the worst on-time record?</p></li>
+<li><p>Refer back to the lists of useful mutate and filtering functions. Describe how each operation changes when you combine it with grouping.</p>
+<p><a href="#mutate-funs">Useful creation functions</a></p>
+<ul>
+<li>+, - etc</li>
+<li>log()</li>
+<li>lead(), lag()</li>
+<li>dense_rank(), min_rank(), percent_rank(), row_number(), cume_dist(), ntile()</li>
+<li>cumsum(), cummean(), cummin(), cummax(), cumany(), cumall()</li>
+<li>na_if(), coalesce()</li>
+<li>if_else(), recode(), case_when()</li>
+</ul></li>
+<li><p>Which plane (<code>tailnum</code>) has the worst on-time record?</p>
+<p>Tailnum <strong>N988AT</strong> has the worst on-time record in terms of percentage of late arrivals <em>for more than twenty flights</em>.</p>
+<!-- The first output below shows N988AT at the top of a descending arrangment. The next output shows N988AT as specifically the top 1.  -->
+<!-- ```{r} -->
+<!-- not_cancelled %>%  -->
+<!--   group_by(tailnum) %>% -->
+<!--   summarise( -->
+<!--     n= n(), -->
+<!--     late = sum(arr_delay > 0), -->
+<!--     pct_arr_delay =  late / n -->
+<!--     ) %>%  -->
+<!--   filter(n > 20) %>%  -->
+<!--   arrange(desc(pct_arr_delay)) -->
+<!-- ``` -->
+<pre class="text"><code>not_cancelled %&gt;% 
+  group_by(tailnum) %&gt;%
+  summarise(
+    n= n(),
+    late = sum(arr_delay &gt; 0),
+    pct_arr_delay =  late / n
+    ) %&gt;% 
+  filter(n &gt; 20) %&gt;% 
+  top_n(1, pct_arr_delay)
+#&gt; # A tibble: 1 x 4
+#&gt;   tailnum     n  late pct_arr_delay
+#&gt;     &lt;chr&gt; &lt;int&gt; &lt;int&gt;         &lt;dbl&gt;
+#&gt; 1  N988AT    35    28           0.8</code></pre>
+<p>The chunk below does not work for the purpose of this excercise. However, it is kept for the purpose of illustrating that max() applies to each summarized group row - i.e., rather than the column vector of the variable of all the summarized rows.</p>
+<pre class="text"><code>not_cancelled %&gt;% 
+  group_by(tailnum) %&gt;%
+  summarise(
+    n= n(),
+    late = sum(arr_delay &gt; 0),
+    pct_arr_delay =  late / n,
+    worst = max(pct_arr_delay)
+    ) %&gt;% 
+  filter(n &gt; 20)
+#&gt; # A tibble: 3,120 x 5
+#&gt;   tailnum     n  late pct_arr_delay     worst
+#&gt;     &lt;chr&gt; &lt;int&gt; &lt;int&gt;         &lt;dbl&gt;     &lt;dbl&gt;
+#&gt; 1  N0EGMQ   352   159     0.4517045 0.4517045
+#&gt; 2  N10156   145    73     0.5034483 0.5034483
+#&gt; 3  N102UW    48    14     0.2916667 0.2916667
+#&gt; 4  N103US    46    13     0.2826087 0.2826087
+#&gt; 5  N104UW    46    13     0.2826087 0.2826087
+#&gt; 6  N10575   269   127     0.4721190 0.4721190
+#&gt; # ... with 3,114 more rows</code></pre></li>
 <li><p>What time of day should you fly if you want to avoid delays as much as possible?</p></li>
 <li><p>For each destination, compute the total minutes of delay. For each, flight, compute the proportion of the total delay for its destination.</p></li>
 <li><p>Delays are typically temporally correlated: even once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using <code>lag()</code> explore how the delay of a flight is related to the delay of the immediately preceding flight.</p></li>
