@@ -131,7 +131,7 @@ $(document).ready(function () {
 <h3>Prerequisites</h3>
 <p>In this chapter we’re going to focus on how to use the dplyr package, another core member of the tidyverse. We’ll illustrate the key ideas using data from the nycflights13 package, and use ggplot2 to help us understand the data.</p>
 <div id="libraries" class="section level4">
-<h4>Libraries</h4>
+<h4>Libraries ***</h4>
 <pre class="text"><code>library(nycflights13)
 library(tidyverse)
 library(dplyr)
@@ -1788,18 +1788,22 @@ popular_dests
 </ul></li>
 <li><p>Which plane (<code>tailnum</code>) has the worst on-time record?</p>
 <p>Tailnum <strong>N988AT</strong> has the worst on-time record in terms of percentage of late arrivals <em>for more than twenty flights</em>.</p>
-<!-- The first output below shows N988AT at the top of a descending arrangment. The next output shows N988AT as specifically the top 1.  -->
-<!-- ```{r} -->
-<!-- not_cancelled %>%  -->
-<!--   group_by(tailnum) %>% -->
-<!--   summarise( -->
-<!--     n= n(), -->
-<!--     late = sum(arr_delay > 0), -->
-<!--     pct_arr_delay =  late / n -->
-<!--     ) %>%  -->
-<!--   filter(n > 20) %>%  -->
-<!--   arrange(desc(pct_arr_delay)) -->
-<!-- ``` -->
+<pre class="text"><code>not_cancelled %&gt;% 
+  group_by(tailnum) %&gt;% 
+  summarise(
+    n = n(),
+    pct_arr_delay = sum(arr_delay &gt; 0) / n()
+  ) %&gt;% 
+  filter(n &gt; 20) %&gt;% 
+  filter(min_rank(desc(pct_arr_delay)) &lt;= 3) %&gt;% 
+  arrange(desc(pct_arr_delay))
+#&gt; # A tibble: 3 x 3
+#&gt;   tailnum     n pct_arr_delay
+#&gt;     &lt;chr&gt; &lt;int&gt;         &lt;dbl&gt;
+#&gt; 1  N988AT    35     0.8000000
+#&gt; 2  N983AT    32     0.7500000
+#&gt; 3  N980AT    47     0.7446809</code></pre>
+<p>Alternately, using top_n(1, x), which is the same as if using above filter(min_rank(desc(x)) &lt;= 1)</p>
 <pre class="text"><code>not_cancelled %&gt;% 
   group_by(tailnum) %&gt;%
   summarise(
@@ -1812,28 +1816,23 @@ popular_dests
 #&gt; # A tibble: 1 x 4
 #&gt;   tailnum     n  late pct_arr_delay
 #&gt;     &lt;chr&gt; &lt;int&gt; &lt;int&gt;         &lt;dbl&gt;
-#&gt; 1  N988AT    35    28           0.8</code></pre>
-<p>The chunk below does not work for the purpose of this excercise. However, it is kept for the purpose of illustrating that max() applies to each summarized group row - i.e., rather than the column vector of the variable of all the summarized rows.</p>
+#&gt; 1  N988AT    35    28           0.8</code></pre></li>
+<li><p>What time of day should you fly if you want to avoid delays as much as possible?</p>
+<p>On average, avoid <strong>7:00PM to 10:00 PM</strong> if you want to avoid delays as much as possible.</p>
 <pre class="text"><code>not_cancelled %&gt;% 
-  group_by(tailnum) %&gt;%
+  group_by(hour) %&gt;% 
   summarise(
-    n= n(),
-    late = sum(arr_delay &gt; 0),
-    pct_arr_delay =  late / n,
-    worst = max(pct_arr_delay)
-    ) %&gt;% 
-  filter(n &gt; 20)
-#&gt; # A tibble: 3,120 x 5
-#&gt;   tailnum     n  late pct_arr_delay     worst
-#&gt;     &lt;chr&gt; &lt;int&gt; &lt;int&gt;         &lt;dbl&gt;     &lt;dbl&gt;
-#&gt; 1  N0EGMQ   352   159     0.4517045 0.4517045
-#&gt; 2  N10156   145    73     0.5034483 0.5034483
-#&gt; 3  N102UW    48    14     0.2916667 0.2916667
-#&gt; 4  N103US    46    13     0.2826087 0.2826087
-#&gt; 5  N104UW    46    13     0.2826087 0.2826087
-#&gt; 6  N10575   269   127     0.4721190 0.4721190
-#&gt; # ... with 3,114 more rows</code></pre></li>
-<li><p>What time of day should you fly if you want to avoid delays as much as possible?</p></li>
+    avg_dep_delay = mean(dep_delay)
+  ) %&gt;% 
+  filter(min_rank(desc(avg_dep_delay)) &lt;= 4) %&gt;% 
+  arrange(desc(avg_dep_delay))
+#&gt; # A tibble: 4 x 2
+#&gt;    hour avg_dep_delay
+#&gt;   &lt;dbl&gt;         &lt;dbl&gt;
+#&gt; 1    19      24.65017
+#&gt; 2    20      24.24992
+#&gt; 3    21      24.16348
+#&gt; 4    17      21.00152</code></pre></li>
 <li><p>For each destination, compute the total minutes of delay. For each, flight, compute the proportion of the total delay for its destination.</p></li>
 <li><p>Delays are typically temporally correlated: even once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using <code>lag()</code> explore how the delay of a flight is related to the delay of the immediately preceding flight.</p></li>
 <li><p>Look at each destination. Can you find flights that are suspiciously fast? (i.e. flights that represent a potential data entry error). Compute the air time a flight relative to the shortest flight to that destination. Which flights were most delayed in the air?</p></li>
