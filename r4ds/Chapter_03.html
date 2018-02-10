@@ -288,7 +288,7 @@ library(ggplot2)</code></pre>
 </div>
 </div>
 <div id="filter" class="section level2">
-<h2>Filter() - Filter rows with <code>filter()</code></h2>
+<h2>Filter rows with <code>filter()</code></h2>
 <p><code>filter()</code> allows you to subset observations based on their values. The first argument is the name of the data frame. The second and subsequent arguments are the expressions that filter the data frame. For example, we can select all flights on January 1st with:</p>
 <pre class="text"><code>filter(flights, month == 1, day == 1)
 #&gt; # A tibble: 842 x 19
@@ -458,8 +458,8 @@ NA * 0
 </div>
 </div>
 </div>
-<div id="arrange---arrange-rows-with-arrange" class="section level2">
-<h2>Arrange() - Arrange rows with <code>arrange()</code></h2>
+<div id="arrange-rows-with-arrange" class="section level2">
+<h2>Arrange rows with <code>arrange()</code></h2>
 <p><code>arrange()</code> works similarly to <code>filter()</code> except that instead of selecting rows, it changes their order. It takes a data frame and a set of column names (or more complicated expressions) to order by. If you provide more than one column name, each additional column will be used to break ties in the values of preceding columns:</p>
 <pre class="text"><code>arrange(flights, year, month, day)
 #&gt; # A tibble: 336,776 x 19
@@ -528,7 +528,7 @@ select(arrange(flights, air_time), flight, month, day, year, air_time)
 </div>
 </div>
 <div id="select" class="section level2">
-<h2>Select() - Select columns with <code>select()</code></h2>
+<h2>Select columns with <code>select()</code></h2>
 <p>It’s not uncommon to get datasets with hundreds or even thousands of variables. In this case, the first challenge is often narrowing in on the variables you’re actually interested in. <code>select()</code> allows you to rapidly zoom in on a useful subset using operations based on the names of the variables.</p>
 <p><code>select()</code> is not terribly useful with the flights data because we only have 19 variables, but you can still get the general idea:</p>
 <pre class="text"><code># Select columns by name
@@ -668,7 +668,7 @@ Yes, it is a surprise that helpers are not case sensitive. How do the select hel
 </div>
 </div>
 <div id="mutate" class="section level2">
-<h2>Mutate() - Add new variables with <code>mutate()</code></h2>
+<h2>Add new variables with <code>mutate()</code></h2>
 <p>Besides selecting sets of existing columns, it’s often useful to add new columns that are functions of existing columns. That’s the job of <code>mutate()</code>.</p>
 <p><code>mutate()</code> always adds new columns at the end of your dataset so we’ll start by creating a narrower dataset so we can see the new variables. Remember that when you’re in RStudio, the easiest way to see all the columns is <code>View()</code>.</p>
 <div id="flight_sml" class="section level5">
@@ -879,8 +879,8 @@ head(min_rank(desc(x)), 10)
 </ol>
 </div>
 </div>
-<div id="summarize---grouped-summaries-with-summarise" class="section level2">
-<h2>Summarize() - Grouped summaries with <code>summarise()</code></h2>
+<div id="grouped-summaries-with-summarise" class="section level2">
+<h2>Grouped summaries with <code>summarise()</code></h2>
 <p>The last key verb is <code>summarise()</code>. It collapses a data frame to a single row:</p>
 <pre class="text"><code>summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
 #&gt; # A tibble: 1 x 1
@@ -906,8 +906,8 @@ summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
 #&gt; # ... with 359 more rows</code></pre>
 <p>Together <code>group_by()</code> and <code>summarise()</code> provide one of the tools that you’ll use most commonly when working with dplyr: grouped summaries. But before we go any further with this, we need to introduce a powerful new idea: the pipe.</p>
 </div>
-<div id="pipe-combining-multiple-operations-with-the-pipe" class="section level3">
-<h3>Pipe %&gt;% Combining multiple operations with the pipe</h3>
+<div id="combine-multiple-operations-with-the-pipe" class="section level3">
+<h3>Combine multiple operations with the Pipe</h3>
 <p>Imagine that we want to explore the relationship between the distance and average delay for each location. Using what you know about dplyr, you might write code like this:</p>
 <pre class="text"><code>by_dest &lt;- group_by(flights, dest)
 delay &lt;- summarise(by_dest,
