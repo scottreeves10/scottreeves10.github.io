@@ -904,6 +904,7 @@ summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
 #&gt; 5  2013     1     5  5.732218
 #&gt; 6  2013     1     6  7.148014
 #&gt; # ... with 359 more rows</code></pre>
+<p><em>Note: Grouping doesn’t change how the data looks (apart from listing how it’s grouped). It changes how it acts with the other dplyr verbs.</em></p>
 <p>Together <code>group_by()</code> and <code>summarise()</code> provide one of the tools that you’ll use most commonly when working with dplyr: grouped summaries. But before we go any further with this, we need to introduce a powerful new idea: the pipe.</p>
 </div>
 <div id="combine-multiple-operations-with-the-pipe" class="section level3">
@@ -982,8 +983,7 @@ ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
 <h5>not_cancelled ***</h5>
 <pre class="text"><code>not_cancelled &lt;- flights %&gt;% 
   filter(!is.na(dep_delay), !is.na(arr_delay))</code></pre>
-<pre class="text"><code>
-not_cancelled %&gt;% 
+<pre class="text"><code>not_cancelled %&gt;% 
   group_by(year, month, day) %&gt;% 
   summarise(mean = mean(dep_delay))
 #&gt; # A tibble: 365 x 4
@@ -1933,7 +1933,58 @@ popular_dests
 #&gt; 2    20      24.24992
 #&gt; 3    21      24.16348
 #&gt; 4    17      21.00152</code></pre></li>
-<li><p>For each destination, compute the total minutes of delay. For each, flight, compute the proportion of the total delay for its destination.</p></li>
+<li><p>For each destination, compute the total minutes of delay. For each, flight compute the proportion of the total delay for its destination.</p>
+<pre class="text"><code># For each destination, compute the total minutes of delay.
+
+not_cancelled %&gt;% 
+  filter(arr_delay &gt; 0) %&gt;% 
+  group_by(dest, flight) %&gt;% 
+  summarize(
+    total_mins = sum(arr_delay)
+    #prop_delay = arr_delay / total_mins
+  ) %&gt;% 
+  select(dest, flight, total_mins) %&gt;% 
+  arrange(dest)
+#&gt; # A tibble: 8,505 x 3
+#&gt; # Groups:   dest [103]
+#&gt;    dest flight total_mins
+#&gt;   &lt;chr&gt;  &lt;int&gt;      &lt;dbl&gt;
+#&gt; 1   ABQ     65       1943
+#&gt; 2   ABQ   1505       2544
+#&gt; 3   ACK   1191       1413
+#&gt; 4   ACK   1195         62
+#&gt; 5   ACK   1291        267
+#&gt; 6   ACK   1491       1232
+#&gt; # ... with 8,499 more rows</code></pre>
+<pre class="text"><code>by_dest &lt;- not_cancelled %&gt;% 
+  filter(arr_delay &gt; 0) %&gt;% 
+  group_by(dest) %&gt;%
+  mutate(
+    total_dest_delay = sum(arr_delay)
+    )
+
+by_flight &lt;- by_dest %&gt;% 
+  group_by(flight) %&gt;% 
+  mutate(
+    prop_delay = sum(arr_delay) / total_dest_delay
+    )
+
+by_flight %&gt;% 
+  ungroup() %&gt;% 
+  group_by(dest, flight, total_dest_delay, prop_delay) %&gt;% 
+  summarize(
+  )
+#&gt; # A tibble: 8,505 x 4
+#&gt; # Groups:   dest, flight, total_dest_delay [?]
+#&gt;    dest flight total_dest_delay prop_delay
+#&gt;   &lt;chr&gt;  &lt;int&gt;            &lt;dbl&gt;      &lt;dbl&gt;
+#&gt; 1   ABQ     65             4487  0.7133943
+#&gt; 2   ABQ   1505             4487  0.6304881
+#&gt; 3   ACK   1191             2974  0.4778077
+#&gt; 4   ACK   1195             2974  0.3190989
+#&gt; 5   ACK   1291             2974  0.1963685
+#&gt; 6   ACK   1491             2974  1.9899126
+#&gt; # ... with 8,499 more rows</code></pre></li>
 <li><p>Delays are typically temporally correlated: even once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using <code>lag()</code> explore how the delay of a flight is related to the delay of the immediately preceding flight.</p></li>
 <li><p>Look at each destination. Can you find flights that are suspiciously fast? (i.e. flights that represent a potential data entry error). Compute the air time a flight relative to the shortest flight to that destination. Which flights were most delayed in the air?</p></li>
 <li><p>Find all destinations that are flown by at least two carriers. Use that information to rank the carriers.</p></li>
