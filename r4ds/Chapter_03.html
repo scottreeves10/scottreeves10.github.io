@@ -1957,17 +1957,22 @@ not_cancelled %&gt;%
 #&gt; 6   ACK   1491       1232
 #&gt; # ... with 8,499 more rows</code></pre>
 <pre class="text"><code>by_dest &lt;- not_cancelled %&gt;% 
-  filter(arr_delay &gt; 0) %&gt;% 
+  filter(arr_delay &gt; 0) %&gt;%   # filter by rows wih arival delays &gt; 0
   group_by(dest) %&gt;%
   mutate(
     total_dest_delay = sum(arr_delay)
     )
+
+# The total_dest_delay gets mutated to each row, respective to the row's dest, and thus is availble to be used below as the detominator in order to calculate the proportional delay.
+
 
 by_flight &lt;- by_dest %&gt;% 
   group_by(flight) %&gt;% 
   mutate(
     prop_delay = sum(arr_delay) / total_dest_delay
     )
+
+# Ungrouping is necessary in order to regroup and summarize. else the results would be a rather uninterptretable as 133K largely non-unique rows, rather than 8K unique rows.  
 
 by_flight %&gt;% 
   ungroup() %&gt;% 
