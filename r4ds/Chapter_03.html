@@ -782,13 +782,26 @@ Yes, it is a surprise that helpers are not case sensitive. How do the select hel
 <div id="cumulative-and-rolling-aggregates-cumsum-cumprod-cummin-cummax-cummean" class="section level5">
 <h5>Cumulative and rolling aggregates: <code>cumsum()</code>, <code>cumprod()</code>, <code>cummin()</code>, <code>cummax()</code>, <code>cummean()</code></h5>
 <ul>
-<li><p>Cumulative and rolling aggregates: R provides functions for running sums, products, mins and maxes: <code>cumsum()</code>, <code>cumprod()</code>, <code>cummin()</code>, <code>cummax()</code>; and dplyr provides <code>cummean()</code> for cumulative means. If you need rolling aggregates (i.e. a sum computed over a rolling window), try the RcppRoll package.</p>
-<pre class="text"><code>x
-#&gt;  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
-<pre class="text"><code>cumsum(x)
-#&gt;  [1]  1  3  6 10 15 21 28 36 45 55</code></pre>
-<pre class="text"><code>cummean(x)
-#&gt;  [1] 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5</code></pre></li>
+<li>Cumulative and rolling aggregates: R provides functions for running sums, products, mins and maxes: <code>cumsum()</code>, <code>cumprod()</code>, <code>cummin()</code>, <code>cummax()</code>; and dplyr provides <code>cummean()</code> for cumulative means. If you need rolling aggregates (i.e. a sum computed over a rolling window), try the RcppRoll package.</li>
+</ul>
+</div>
+<div id="x" class="section level5">
+<h5>x ***</h5>
+<pre><code>```text
+x
+#&gt;  [1]  1  2  3  4  5  6  7  8  9 10
+```
+
+```text
+cumsum(x)
+#&gt;  [1]  1  3  6 10 15 21 28 36 45 55
+```
+
+```text
+cummean(x)
+#&gt;  [1] 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5
+```</code></pre>
+<ul>
 <li><p>Logical comparisons, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>!=</code>, which you learned about earlier. If you’re doing a complex sequence of logical operations it’s often a good idea to store the interim values in new variables so you can check that each step is working as expected.</p></li>
 <li><p>Ranking: there are a number of ranking functions, but you should start with <code>min_rank()</code>. It does the most usual type of ranking (e.g. 1st, 2nd, 2nd, 4th). The default gives smallest values the small ranks; use <code>desc(x)</code> to give the largest values the smallest ranks.</p>
 <pre class="text"><code>y &lt;- c(1, 2, 2, NA, 3, 4)
@@ -2110,7 +2123,320 @@ flights %&gt;%
 #&gt; 5   AUS      B6               747
 #&gt; 6   AUS      UA               670
 #&gt; # ... with 236 more rows</code></pre></li>
-<li><p>For each plane, count the number of flights before the first delay of greater than 1 hour.</p></li>
+<li><p>For each plane, count the number of flights before the first delay of greater than 1 hour.</p>
+<blockquote>
+<p>To answer this question, the entire exploratory analysis is left intact to demonstrate the process. Some take-aways include: answer the right question and check your intuitions whenever possible. It would have been easy to stop midway, but something didn’t feel right. Pushing through got the right result.</p>
+</blockquote>
+<p>The intuition here is to use lead() and probably cumsum() in some way. To do that we will need a temporal sequence of delays based on some other variable. What are the choices for the other variable? Plane equates to tailnum, but does that make sense? Planes arrive at one airport and then on to the next. We’ll see.</p>
+<pre class="text"><code>#List the variables.
+
+names(flights)
+#&gt;  [1] &quot;year&quot;           &quot;month&quot;          &quot;day&quot;            &quot;dep_time&quot;      
+#&gt;  [5] &quot;sched_dep_time&quot; &quot;dep_delay&quot;      &quot;arr_time&quot;       &quot;sched_arr_time&quot;
+#&gt;  [9] &quot;arr_delay&quot;      &quot;carrier&quot;        &quot;flight&quot;         &quot;tailnum&quot;       
+#&gt; [13] &quot;origin&quot;         &quot;dest&quot;           &quot;air_time&quot;       &quot;distance&quot;      
+#&gt; [17] &quot;hour&quot;           &quot;minute&quot;         &quot;time_hour&quot;</code></pre>
+<pre class="text"><code># Variables we may want to use:
+# 
+# Year, month and day - for sure
+# sched_dep_time - possibly
+# dep_delay - for sure
+# carrier - likely
+# flight - possibly
+# tailnum - possibly</code></pre>
+<pre class="text"><code># Explore delays by day by plane:
+
+flights %&gt;%
+  group_by(year, month, day, tailnum) %&gt;% 
+  summarize(total_delay = sum(dep_delay)) %&gt;% 
+  filter(month == 7, day == 20) %&gt;%  # filter by an arbitrary day
+  arrange(desc(total_delay))
+#&gt; # A tibble: 633 x 5
+#&gt; # Groups:   year, month, day [1]
+#&gt;    year month   day tailnum total_delay
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;       &lt;dbl&gt;
+#&gt; 1  2013     7    20  N718EV         242
+#&gt; 2  2013     7    20  N121UW         236
+#&gt; 3  2013     7    20  N917XJ         233
+#&gt; 4  2013     7    20  N525MQ         226
+#&gt; 5  2013     7    20  N931XJ         220
+#&gt; 6  2013     7    20  N706JB         210
+#&gt; # ... with 627 more rows</code></pre>
+<pre class="text"><code># On 2018-July-20 tailnum N718EV experienced total departure delays of 242 minutes.
+# Let's explore that further, looking for a pattern we can generalize.
+
+flights %&gt;%
+  filter(month == 7, day == 20, tailnum == &quot;N718EV&quot;, sched_dep_time, dep_delay) %&gt;% 
+  select(tailnum, origin, sched_dep_time, dep_delay, dest, arr_time, arr_delay) %&gt;% 
+  arrange(sched_dep_time)
+#&gt; # A tibble: 2 x 7
+#&gt;   tailnum origin sched_dep_time dep_delay  dest arr_time arr_delay
+#&gt;     &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1  N718EV    LGA            930        83   MCI     1251        59
+#&gt; 2  N718EV    LGA           1830       159   RDU     2236       131</code></pre>
+<pre class="text"><code># Maybe tailnum N718EV isn't the best example since it only flew twice that day, both times out of LaGuardia no less. But there may be a pattern here we can use. Let's find a plane with more than two flights in a day and a total departure delay &gt; 60 minutes.
+
+flights %&gt;%
+  group_by(year, month, day, tailnum) %&gt;% 
+  summarize(
+    total_delay = sum(dep_delay),
+    n = n()
+      ) %&gt;% 
+  filter(month == 7, day == 20, n &gt; 2, total_delay &gt; 60) %&gt;%  # arbitrary day
+  arrange(desc(total_delay))
+#&gt; # A tibble: 4 x 6
+#&gt; # Groups:   year, month, day [1]
+#&gt;    year month   day tailnum total_delay     n
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;
+#&gt; 1  2013     7    20  N187JB         121     3
+#&gt; 2  2013     7    20  N591JB         108     3
+#&gt; 3  2013     7    20  N721MQ         102     3
+#&gt; 4  2013     7    20  N374JB          67     4</code></pre>
+<pre class="text"><code># Let's explore tailnum N374JB, which had 4 flights on 2018-July-20 and experienced total departure delays of 67 minutes, looking for a pattern we can generalize.
+
+flights %&gt;%
+  filter(month == 7, day == 20, tailnum == &quot;N374JB&quot;, sched_dep_time, dep_delay) %&gt;% 
+  select(tailnum, origin, sched_dep_time, dep_delay, dest, arr_time, arr_delay) %&gt;% 
+  arrange(sched_dep_time)
+#&gt; # A tibble: 4 x 7
+#&gt;   tailnum origin sched_dep_time dep_delay  dest arr_time arr_delay
+#&gt;     &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1  N374JB    JFK            605        -2   MCO      830        -9
+#&gt; 2  N374JB    JFK           1229        10   BUF     1420        29
+#&gt; 3  N374JB    JFK           1635        28   BUF     1817         2
+#&gt; 4  N374JB    JFK           2125        31   BOS     2341        55</code></pre>
+<pre class="text"><code>
+# We can see this plane always left out of JFK, but never experienced a departure delay exceeding 60 minutes. So we need to reset on the question: it is not about cumulative delays, but individual delays. </code></pre>
+<pre class="text"><code># Find a plane which flew multiple times in a day, and experienced at least one departure delay &gt; 60 minutes.
+
+flights %&gt;%
+  group_by(year, month, day, tailnum) %&gt;% 
+  summarise(
+    n_flights = n(),
+    max_delay = max(dep_delay)
+    ) %&gt;% 
+  filter(n_flights &gt; 3, max_delay &gt; 60, month == 7)
+#&gt; # A tibble: 115 x 6
+#&gt; # Groups:   year, month, day [26]
+#&gt;    year month   day tailnum n_flights max_delay
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;     &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1  2013     7     1  N184JB         4       207
+#&gt; 2  2013     7     1  N273JB         4       124
+#&gt; 3  2013     7     1  N752US         4        81
+#&gt; 4  2013     7     2  N231JB         4       222
+#&gt; 5  2013     7     2  N247JB         4        90
+#&gt; 6  2013     7     2  N281JB         4        87
+#&gt; # ... with 109 more rows</code></pre>
+<pre class="text"><code># On 2013-July-03 tailnum N13988 had 4 flights and experienced a maxiumum departure delay of 140 minutes. Let's explore that one further, again looking for a pattern we can generalize.
+
+flights %&gt;%
+  filter(month == 7, day == 03, tailnum == &quot;N13988&quot;, sched_dep_time, dep_delay) %&gt;% 
+  select(tailnum, origin, sched_dep_time, dep_delay, dest, arr_time, arr_delay) %&gt;% 
+  arrange(sched_dep_time)
+#&gt; # A tibble: 4 x 7
+#&gt;   tailnum origin sched_dep_time dep_delay  dest arr_time arr_delay
+#&gt;     &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1  N13988    EWR            650         1   BUF      755       -13
+#&gt; 2  N13988    EWR           1015        92   CHS     1436       147
+#&gt; 3  N13988    EWR           1550       137   CVG     2013       141
+#&gt; 4  N13988    EWR           2055       140   JAX      127       123</code></pre>
+<pre class="text"><code># So, N13988 had one flight before its next dep delay was &gt; 60 mins. Let's try to count that.
+
+flights %&gt;% 
+  filter(year == 2013, month == 7, day == 03, tailnum == &quot;N13988&quot;) %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  arrange(sched_dep_time) %&gt;%
+  mutate(
+    flights_before = cumsum(dep_delay &lt;= 60)       # cumsum() - TURNED OUT NOT TO WORK, as below.
+    #flights_before = sum(cumall(dep_delay &lt;= 60)) # sum(cumall()) - TURNED out to be KEY to final success
+    ) %&gt;% 
+  filter(arr_delay &gt; 60 &amp; lag(arr_delay &lt; 60)) %&gt;% 
+  select(year, month, day, tailnum, origin, sched_dep_time, dep_delay, flights_before)
+#&gt; # A tibble: 1 x 8
+#&gt; # Groups:   year, month, day, tailnum [1]
+#&gt;    year month   day tailnum origin sched_dep_time dep_delay flights_before
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt;          &lt;int&gt;
+#&gt; 1  2013     7     3  N13988    EWR           1015        92              1</code></pre>
+<pre class="text"><code># That works. Let's try it with one month of data and all planes.
+
+flights %&gt;% 
+  filter(year == 2013, month == 7) %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  arrange(sched_dep_time) %&gt;%
+  mutate(
+    flights_before = cumsum(dep_delay &gt;= 60)
+    ) %&gt;% 
+  filter(dep_delay &gt; 60 &amp; lag(dep_delay &lt; 60)) %&gt;% 
+  select(year, month, day, tailnum, origin, sched_dep_time, dep_delay, flights_before) %&gt;% 
+  arrange(desc(flights_before))
+#&gt; # A tibble: 1,086 x 8
+#&gt; # Groups:   year, month, day, tailnum [1,084]
+#&gt;    year month   day tailnum origin sched_dep_time dep_delay flights_before
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt;          &lt;int&gt;
+#&gt; 1  2013     7     9  N738EV    LGA           1500       101              2
+#&gt; 2  2013     7    27  N324JB    JFK           1700       202              2
+#&gt; 3  2013     7     9  N518MQ    JFK           1935        99              2
+#&gt; 4  2013     7     9  N8936A    JFK           2030        99              2
+#&gt; 5  2013     7    11  N179JB    JFK           2030        87              2
+#&gt; 6  2013     7     2  N247JB    JFK           2130        90              2
+#&gt; # ... with 1,080 more rows</code></pre>
+<pre class="text"><code># The results look suspicious in that the greatest number of flights before any plane experienced a departure delay &gt; 60 mins was 2. Let's look at one of those planes.
+
+flights %&gt;%
+  filter(month == 7, day == 21, tailnum == &quot;N851MQ&quot;, sched_dep_time, dep_delay) %&gt;% 
+  select(tailnum, origin, sched_dep_time, dep_delay, dest, arr_time, arr_delay) %&gt;% 
+  arrange(sched_dep_time)
+#&gt; # A tibble: 3 x 7
+#&gt;   tailnum origin sched_dep_time dep_delay  dest arr_time arr_delay
+#&gt;     &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1  N851MQ    JFK            815        72   DCA     1025        55
+#&gt; 2  N851MQ    JFK           1720        24   DCA     1936        46
+#&gt; 3  N851MQ    JFK           2140        70   DCA       11        71</code></pre>
+<pre class="text"><code># Having actually checked two planes, they both had 2 flights before experiencing a departure delay &gt; 60 minutes. Intuition is that few if any planes made many more than 3 or 4 flights per day.
+
+flights %&gt;% 
+  filter(year == 2013, month == 7) %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  arrange(sched_dep_time) %&gt;%
+  mutate(
+    flights_before = cumsum(dep_delay &gt;= 60)
+    ) %&gt;% 
+  filter(dep_delay &gt; 60 &amp; lag(dep_delay &lt; 60)) %&gt;% 
+  select(year, month, day, tailnum, origin, sched_dep_time, dep_delay, flights_before) %&gt;% 
+  arrange(desc(flights_before))
+#&gt; # A tibble: 1,086 x 8
+#&gt; # Groups:   year, month, day, tailnum [1,084]
+#&gt;    year month   day tailnum origin sched_dep_time dep_delay flights_before
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt;          &lt;int&gt;
+#&gt; 1  2013     7     9  N738EV    LGA           1500       101              2
+#&gt; 2  2013     7    27  N324JB    JFK           1700       202              2
+#&gt; 3  2013     7     9  N518MQ    JFK           1935        99              2
+#&gt; 4  2013     7     9  N8936A    JFK           2030        99              2
+#&gt; 5  2013     7    11  N179JB    JFK           2030        87              2
+#&gt; 6  2013     7     2  N247JB    JFK           2130        90              2
+#&gt; # ... with 1,080 more rows</code></pre>
+<pre class="text"><code># Let's explore the intuition that few planes made more than around 4 flights per day. And if they did, intuition says they are flying short routes, so let's also see what their max_delay was.
+
+flights %&gt;% 
+  filter(!is.na(tailnum)) %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  summarize(
+    n = n(),
+    max_delay = max(dep_delay, na.rm = TRUE)
+    ) %&gt;%
+  filter(n &gt;= 4) %&gt;% 
+  arrange(desc(n))
+#&gt; # A tibble: 2,941 x 6
+#&gt; # Groups:   year, month, day [358]
+#&gt;    year month   day tailnum     n max_delay
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt; &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1  2013     1    16  N15572     5        75
+#&gt; 2  2013     1    28  N26549     5        96
+#&gt; 3  2013     2     2  N329JB     5        78
+#&gt; 4  2013     2     5  N546MQ     5        -1
+#&gt; 5  2013     2     8  N351JB     5        26
+#&gt; 6  2013     2    10  N197JB     5        48
+#&gt; # ... with 2,935 more rows</code></pre>
+<pre class="text"><code># So tailnum N732US made 5 flights on 2013-02-15 and experienced a max departure delay of 114 minutes. Did it make more than 2 flights before this?
+
+flights %&gt;%
+  filter(month == 2, day == 15, tailnum == &quot;N732US&quot;, sched_dep_time, dep_delay) %&gt;% 
+  select(tailnum, origin, sched_dep_time, dep_delay, dest) %&gt;% 
+  arrange(sched_dep_time)
+#&gt; # A tibble: 5 x 5
+#&gt;   tailnum origin sched_dep_time dep_delay  dest
+#&gt;     &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;
+#&gt; 1  N732US    LGA            700        -4   DCA
+#&gt; 2  N732US    LGA           1100        22   DCA
+#&gt; 3  N732US    LGA           1500        -5   DCA
+#&gt; 4  N732US    LGA           1800        97   DCA
+#&gt; 5  N732US    LGA           2100       114   DCA</code></pre>
+<pre class="text"><code>
+# Yes, it made 3 flights before. Therefore, something is wrong with the generalized code above!!!</code></pre>
+<pre class="text"><code># Let's try that one particular plane tailnum N732US made 5 flights on 2013-02-15
+
+flights %&gt;% 
+  filter(year == 2013, month == 2, day == 15, tailnum == &quot;N732US&quot;) %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  arrange(sched_dep_time) %&gt;%
+  mutate(
+    flights_before = cumsum(dep_delay &lt;= 60)       # cumsum()
+    #flights_before = sum(cumall(dep_delay &lt;= 60)) # sum(cumall()) also works
+    ) %&gt;% 
+  filter(arr_delay &gt; 60 &amp; lag(arr_delay &lt; 60)) %&gt;% 
+  select(year, month, day, tailnum, origin, sched_dep_time, dep_delay, flights_before)
+#&gt; # A tibble: 1 x 8
+#&gt; # Groups:   year, month, day, tailnum [1]
+#&gt;    year month   day tailnum origin sched_dep_time dep_delay flights_before
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt;          &lt;int&gt;
+#&gt; 1  2013     2    15  N732US    LGA           1800        97              3</code></pre>
+<pre class="text"><code>
+# That works, which indicates there is in error in the generalized code chunk.</code></pre>
+<pre class="text"><code># We'll try modificating on this generalized chunk, and set the filter for our known observation
+
+flights %&gt;% 
+  filter(year == 2013, month == 2, tailnum == &quot;N732US&quot;) %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  arrange(sched_dep_time) %&gt;%
+  mutate(
+  # flights_before = cumsum(lead(dep_delay &gt;= 60)) # DOES NOT WORK
+  flights_before = sum(cumall(dep_delay &lt;= 60)) # sum(cumall()) DOES WORK
+  # flights_before = cumall(dep_delay &lt;= 60) # DOES NOT WORK
+  # flights_before = cumall(lead(dep_delay &lt;= 60)) # DOES NOT WORK
+    ) %&gt;% 
+  filter(dep_delay &gt; 60 &amp; lag(dep_delay &lt; 60)) %&gt;% 
+  select(year, month, day, tailnum, origin, sched_dep_time, dep_delay, flights_before) %&gt;% 
+  arrange(desc(flights_before))
+#&gt; # A tibble: 1 x 8
+#&gt; # Groups:   year, month, day, tailnum [1]
+#&gt;    year month   day tailnum origin sched_dep_time dep_delay flights_before
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt;          &lt;int&gt;
+#&gt; 1  2013     2    15  N732US    LGA           1800        97              3</code></pre>
+<pre class="text"><code># Test on larger data set
+
+flights %&gt;% 
+  filter(year == 2013, month == 2) %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  arrange(sched_dep_time) %&gt;%
+  mutate(
+  flights_before = sum(cumall(dep_delay &lt;= 60)) # sum(cumall()) DOES WORK
+    ) %&gt;% 
+  filter(dep_delay &gt; 60 &amp; lag(dep_delay &lt; 60)) %&gt;% 
+  select(year, month, day, tailnum, origin, sched_dep_time, dep_delay, flights_before) %&gt;% 
+  arrange(desc(flights_before))
+#&gt; # A tibble: 462 x 8
+#&gt; # Groups:   year, month, day, tailnum [460]
+#&gt;    year month   day tailnum origin sched_dep_time dep_delay flights_before
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt;          &lt;int&gt;
+#&gt; 1  2013     2    28  N12567    EWR           2140        77              4
+#&gt; 2  2013     2    18  N296JB    JFK           1555        94              3
+#&gt; 3  2013     2    15  N732US    LGA           1800        97              3
+#&gt; 4  2013     2    20  N767UW    LGA           1900        93              3
+#&gt; 5  2013     2    21  N756US    LGA           1900        80              3
+#&gt; 6  2013     2    15  N16981    EWR           1940        88              3
+#&gt; # ... with 456 more rows</code></pre>
+<pre class="text"><code>
+# Success. Now we're cooking with gas. </code></pre>
+<pre class="text"><code># Final. All data. Filter results to flights before 60 minute delay to &gt; 3 since this chunk requires relatively more comupations than other chunks. 
+
+flights %&gt;% 
+  group_by(year, month, day, tailnum) %&gt;% 
+  arrange(sched_dep_time) %&gt;%
+  mutate(
+  flights_before = sum(cumall(dep_delay &lt;= 60)) # sum(cumall()) DOES WORK
+    ) %&gt;% 
+  filter(dep_delay &gt; 60 &amp; lag(dep_delay &lt; 60) &amp; flights_before &gt; 3) %&gt;% 
+  select(year, month, day, tailnum, origin, sched_dep_time, dep_delay, flights_before) %&gt;% 
+  arrange(desc(flights_before))
+#&gt; # A tibble: 5 x 8
+#&gt; # Groups:   year, month, day, tailnum [5]
+#&gt;    year month   day tailnum origin sched_dep_time dep_delay flights_before
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;dbl&gt;          &lt;int&gt;
+#&gt; 1  2013     7    29  N329JB    JFK           1901       152              4
+#&gt; 2  2013     7    12  N298JB    JFK           2120        76              4
+#&gt; 3  2013     8    11  N298JB    JFK           2125        72              4
+#&gt; 4  2013     2    28  N12567    EWR           2140        77              4
+#&gt; 5  2013     7     7  N374JB    JFK           2245       227              4</code></pre></li>
 </ol>
 </div>
 </div>
