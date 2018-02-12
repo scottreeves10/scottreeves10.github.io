@@ -9,8 +9,8 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="Scott Reeves" />
 
-<meta name="date" content="2018-02-03" />
 
 <title>Chapter 8 - Data Import with readr2</title>
 
@@ -217,7 +217,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Chapter 8 - Data Import with readr2</h1>
-<h4 class="date"><em>2018-02-03</em></h4>
+<h4 class="author"><em>Scott Reeves</em></h4>
 
 </div>
 
@@ -337,18 +337,17 @@ read_csv(&quot;1,2,3\n4,5,6&quot;, col_names = c(&quot;x&quot;, &quot;y&quot;, &
 <div id="exercises" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
-<li><p>What function would you use to read a file where fields were separated with<br />
-“|”?</p>
+<li><p><span style="color:blue">What function would you use to read a file where fields were separated with “|”? </span></p>
 <pre class="r"><code>read_delim()</code></pre></li>
-<li><p>Apart from <code>file</code>, <code>skip</code>, and <code>comment</code>, what other arguments do <code>read_csv()</code> and <code>read_tsv()</code> have in common?</p>
+<li><p><span style="color:blue">Apart from <code>file</code>, <code>skip</code>, and <code>comment</code>, what other arguments do <code>read_csv()</code> and <code>read_tsv()</code> have in common?</span></p>
 <p>They both have the same arguments, the others being: col_types, locale, na, quoted_na, quote, trim_ws, n_max, guess_max, progress</p>
 <pre class="r"><code>union(names(formals(read_csv)), names(formals(read_tsv)))</code></pre>
 <pre><code>#&gt;  [1] &quot;file&quot;      &quot;col_names&quot; &quot;col_types&quot; &quot;locale&quot;    &quot;na&quot;       
 #&gt;  [6] &quot;quoted_na&quot; &quot;quote&quot;     &quot;comment&quot;   &quot;trim_ws&quot;   &quot;skip&quot;     
 #&gt; [11] &quot;n_max&quot;     &quot;guess_max&quot; &quot;progress&quot;</code></pre></li>
-<li><p>What are the most important arguments to <code>read_fwf()</code>? Read a fixed width file into a tibble.</p>
+<li><p><span style="color:blue">What are the most important arguments to <code>read_fwf()</code>? Read a fixed width file into a tibble. </span></p>
 <p>The most important arguments are Column positions, as created by <code>fwf_empty()</code>, <code>fwf_widths()</code> or <code>fwf_positions()</code>.</p></li>
-<li><p>Sometimes strings in a CSV file contain commas. To prevent them from causing problems they need to be surrounded by a quoting character, like <code>&quot;</code> or <code>'</code>. By convention, <code>read_csv()</code> assumes that the quoting character will be <code>&quot;</code>, and if you want to change it you’ll need to use <code>read_delim()</code> instead. What arguments do you need to specify to read the following text into a data frame?</p>
+<li><p><span style="color:blue">Sometimes strings in a CSV file contain commas. To prevent them from causing problems they need to be surrounded by a quoting character, like <code>&quot;</code> or <code>'</code>. By convention, <code>read_csv()</code> assumes that the quoting character will be <code>&quot;</code>, and if you want to change it you’ll need to use <code>read_delim()</code> instead. What arguments do you need to specify to read the following text into a data frame?</span></p>
 <pre class="r"><code>&quot;x,y\n1,'a,b'&quot;</code></pre>
 <p>You need to specify <code>quote = &quot;'&quot;</code> in:</p>
 <pre class="r"><code>read_delim(&quot;x,y\n1,'a,b'&quot;, delim = &quot;,&quot;, quote = &quot;'&quot;)</code></pre>
@@ -362,7 +361,7 @@ read_csv(&quot;1,2,3\n4,5,6&quot;, col_names = c(&quot;x&quot;, &quot;y&quot;, &
 #&gt;       x     y
 #&gt;   &lt;int&gt; &lt;chr&gt;
 #&gt; 1     1   a,b</code></pre></li>
-<li><p>Identify what is wrong with each of the following inline CSV files. What happens when you run the code?</p>
+<li><p><span style="color:blue">Identify what is wrong with each of the following inline CSV files. What happens when you run the code?</span></p>
 <pre class="r"><code>read_csv(&quot;a,b\n1,2,3\n4,5,6&quot;)
 read_csv(&quot;a,b,c\n1,2\n1,2,3,4&quot;)
 read_csv(&quot;a,b\n\&quot;1&quot;)
@@ -650,9 +649,9 @@ the one provided in the hms package.</code></pre>
 <div id="exercises-1" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
-<li><p>What are the most important arguments to <code>locale()</code>?</p>
+<li><p><span style="color:blue">What are the most important arguments to <code>locale()</code>? </span></p>
 <p>When parsing numbers, the most important arguments to <code>locale()</code> are <code>decimal mark</code> and grouping_mark.</p></li>
-<li><p>What happens if you try and set <code>decimal_mark</code> and <code>grouping_mark</code> to the same character? What happens to the default value of <code>grouping_mark</code> when you set <code>decimal_mark</code> to “,”? What happens to the default value of <code>decimal_mark</code> when you set the <code>grouping_mark</code> to “.”?</p>
+<li><p><span style="color:blue">What happens if you try and set <code>decimal_mark</code> and <code>grouping_mark</code> to the same character? What happens to the default value of <code>grouping_mark</code> when you set <code>decimal_mark</code> to “,”? What happens to the default value of <code>decimal_mark</code> when you set the <code>grouping_mark</code> to “.”?</span></p>
 <pre class="r"><code># When `decimal_mark` and `grouping_mark` to the same character the fractional
 # digits become part of the whole
 # 
