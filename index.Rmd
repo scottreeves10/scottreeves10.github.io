@@ -5,7 +5,6 @@ output:
     theme: flatly
     # toc: true
     # toc_float: true
-    #highlight: tango
 ---
 
 ```{r include=FALSE}
