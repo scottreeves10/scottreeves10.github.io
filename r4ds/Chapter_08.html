@@ -704,7 +704,8 @@ t2 &lt;- &quot;11:15:10.12 PM&quot;</code></pre>
 <pre><code>#&gt; [1] &quot;2014-12-30&quot;</code></pre>
 <pre class="r"><code>parse_time(t1, &quot;%H%M&quot;)</code></pre>
 <pre><code>#&gt; 17:05:00</code></pre>
-<pre class="r"><code>parse_time(t2, &quot;%H:%M:%OS %p&quot;) # Seconds: &quot;%S&quot; (integer seconds), &quot;%OS&quot; (partial seconds)</code></pre>
+<p>Seconds: “%S” (integer seconds), “%OS” (partial seconds)</p>
+<pre class="r"><code>parse_time(t2, &quot;%H:%M:%OS %p&quot;) </code></pre>
 <pre><code>#&gt; 23:15:10.12</code></pre></li>
 </ol>
 </div>
@@ -718,6 +719,8 @@ t2 &lt;- &quot;11:15:10.12 PM&quot;</code></pre>
 </ol>
 <div id="strategy" class="section level3">
 <h3>Strategy</h3>
+<div id="heuristic-parsing-guess_parser-parse_guess" class="section level5">
+<h5>heuristic parsing, <code>guess_parser()</code>, <code>parse_guess()</code></h5>
 <p>readr uses a heuristic to figure out the type of each column: it reads the first 1000 rows and uses some (moderately conservative) heuristics to figure out the type of each column. You can emulate this process with a character vector using <code>guess_parser()</code>, which returns readr’s best guess, and <code>parse_guess()</code> which uses that guess to parse the column:</p>
 <pre class="r"><code>guess_parser(&quot;2010-10-01&quot;)</code></pre>
 <pre><code>#&gt; [1] &quot;date&quot;</code></pre>
@@ -743,6 +746,7 @@ t2 &lt;- &quot;11:15:10.12 PM&quot;</code></pre>
 </ul>
 <p>If none of these rules apply, then the column will stay as a vector of strings.</p>
 </div>
+</div>
 <div id="problems-1" class="section level3">
 <h3>Problems</h3>
 <p>These defaults don’t always work for larger files. There are two basic problems:</p>
@@ -751,6 +755,8 @@ t2 &lt;- &quot;11:15:10.12 PM&quot;</code></pre>
 <li><p>The column might contain a lot of missing values. If the first 1000 rows contain only <code>NA</code>s, readr will guess that it’s a character vector, whereas you probably want to parse it as something more specific.</p></li>
 </ol>
 <p>readr contains a challenging CSV that illustrates both of these problems:</p>
+<div id="readr_examplechallenge.csv" class="section level5">
+<h5>readr_example(“challenge.csv”)</h5>
 <pre class="r"><code>challenge &lt;- read_csv(readr_example(&quot;challenge.csv&quot;))</code></pre>
 <pre><code>#&gt; Parsed with column specification:
 #&gt; cols(
@@ -781,6 +787,9 @@ t2 &lt;- &quot;11:15:10.12 PM&quot;</code></pre>
 #&gt; 10  1010     x no trailing characters  .2983446326106787
 #&gt; # ... with 990 more rows, and 1 more variables: file &lt;chr&gt;</code></pre>
 <p>A good strategy is to work column by column until there are no problems remaining. Here we can see that there are a lot of parsing problems with the <code>x</code> column - there are trailing characters after the integer value. That suggests we need to use a double parser instead.</p>
+</div>
+<div id="col_types-cols-argument" class="section level4">
+<h4>col_types = cols() argument</h4>
 <p>To fix the call, start by copying and pasting the column specification into your original call:</p>
 <pre class="r"><code>challenge &lt;- read_csv(
   readr_example(&quot;challenge.csv&quot;), 
@@ -827,11 +836,17 @@ tail(challenge)</code></pre>
 #&gt; 5 0.2698786 2020-02-04
 #&gt; 6 0.6082372 2019-01-06</code></pre>
 <p>Every <code>parse_xyz()</code> function has a corresponding <code>col_xyz()</code> function. You use <code>parse_xyz()</code> when the data is in a character vector in R already; you use <code>col_xyz()</code> when you want to tell readr how to load the data.</p>
-<p>I highly recommend always supplying <code>col_types</code>, building up from the print-out provided by readr. This ensures that you have a consistent and reproducible data import script. If you rely on the default guesses and your data changes, readr will continue to read it in. If you want to be really strict, use <code>stop_for_problems()</code>: that will throw an error and stop your script if there are any parsing problems.</p>
+</div>
+<div id="stop_for_problems" class="section level4">
+<h4><code>stop_for_problems()</code></h4>
+<p>I <strong>highly recommend always supplying <code>col_types</code></strong>, building up from the print-out provided by readr. This ensures that you have a consistent and reproducible data import script. If you rely on the default guesses and your data changes, readr will continue to read it in. If you want to be really strict, use <code>stop_for_problems()</code>: that will throw an error and stop your script if there are any parsing problems.</p>
+</div>
 </div>
 <div id="other-strategies" class="section level3">
 <h3>Other strategies</h3>
 <p>There are a few other general strategies to help you parse files:</p>
+<div id="guess_max" class="section level4">
+<h4>guess_max =</h4>
 <ul>
 <li><p>In the previous example, we just got unlucky: if we look at just one more row than the default, we can correctly parse in one shot:</p>
 <pre class="r"><code>challenge2 &lt;- read_csv(readr_example(&quot;challenge.csv&quot;), guess_max = 1001)</code></pre>
@@ -858,37 +873,59 @@ tail(challenge)</code></pre>
 <li><p>Sometimes it’s easier to diagnose problems if you just read in all the columns as character vectors:</p>
 <pre class="r"><code>challenge2 &lt;- read_csv(readr_example(&quot;challenge.csv&quot;), 
   col_types = cols(.default = col_character())
-)</code></pre>
-<p>This is particularly useful in conjunction with <code>type_convert()</code>, which applies the parsing heuristics to the character columns in a data frame.</p>
-<pre class="r"><code>df &lt;- tribble(
+)</code></pre></li>
+</ul>
+</div>
+<div id="type_convert" class="section level4">
+<h4><code>type_convert()</code></h4>
+<pre><code>This is particularly useful in conjunction with `type_convert()`, which applies the parsing heuristics to the character columns in a data frame.
+
+
+```r
+df &lt;- tribble(
   ~x,  ~y,
   &quot;1&quot;, &quot;1.21&quot;,
   &quot;2&quot;, &quot;2.32&quot;,
   &quot;3&quot;, &quot;4.56&quot;
 )
-df</code></pre>
-<pre><code>#&gt; # A tibble: 3 x 2
+df
+```
+
+```
+#&gt; # A tibble: 3 x 2
 #&gt;       x     y
 #&gt;   &lt;chr&gt; &lt;chr&gt;
 #&gt; 1     1  1.21
 #&gt; 2     2  2.32
-#&gt; 3     3  4.56</code></pre>
-<pre class="r"><code># Note the column types
-type_convert(df)</code></pre>
-<pre><code>#&gt; Parsed with column specification:
+#&gt; 3     3  4.56
+```
+
+```r
+# Note the column types
+type_convert(df)
+```
+
+```
+#&gt; Parsed with column specification:
 #&gt; cols(
 #&gt;   x = col_integer(),
 #&gt;   y = col_double()
-#&gt; )</code></pre>
-<pre><code>#&gt; # A tibble: 3 x 2
+#&gt; )
+```
+
+```
+#&gt; # A tibble: 3 x 2
 #&gt;       x     y
 #&gt;   &lt;int&gt; &lt;dbl&gt;
 #&gt; 1     1  1.21
 #&gt; 2     2  2.32
-#&gt; 3     3  4.56</code></pre></li>
+#&gt; 3     3  4.56
+```</code></pre>
+<ul>
 <li><p>If you’re reading a very large file, you might want to set <code>n_max</code> to a smallish number like 10,000 or 100,000. That will accelerate your iterations while you eliminate common problems.</p></li>
-<li><p>If you’re having major parsing problems, sometimes it’s easier to just read into a character vector of lines with <code>read_lines()</code>, or even a character vector of length 1 with <code>read_file()</code>. Then you can use the string parsing skills you’ll learn later to parse more exotic formats.</p></li>
+<li><p>If you’re having major parsing problems, sometimes it’s easier to just read into a character vector of lines with <code>read_lines()</code>, or even a character vector of length 1 with <code>read_file()</code>. Then you can use the string parsing skills you’ll learn later to parsemore exotic formats.</p></li>
 </ul>
+</div>
 </div>
 </div>
 <div id="writing-to-a-file" class="section level2">
