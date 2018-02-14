@@ -418,7 +418,7 @@ ggplot(table1, aes(year, cases)) +
 Gathering <code>table4</code> into a tidy form.
 </p>
 </div>
-<p>In the final result, <span class="emph">the gathered columns are dropped</span>, and we get <span class="emph">new <code>key</code> and <code>value</code> columns<span></span>. Otherwise, the relationships between the original variables are preserved. Visually, this is shown in Figure @ref(fig:tidy-gather). We can use <code>gather()</code> to tidy <code>table4b</code> in a similar fashion. The only difference is the variable stored in the cell values:</p>
+<p>In the final result, <span class="emph">the gathered columns are dropped</span>, and we get <span class="emph">new <code>key</code> and <code>value</code> columns</span>. Otherwise, the relationships between the original variables are preserved. Visually, this is shown in Figure @ref(fig:tidy-gather). We can use <code>gather()</code> to tidy <code>table4b</code> in a similar fashion. The only difference is the variable stored in the cell values:</p>
 <pre class="r"><code>table4b %&gt;% 
   gather(`1999`, `2000`, key = &quot;year&quot;, value = &quot;population&quot;)</code></pre>
 <pre><code>#&gt; # A tibble: 6 x 3
