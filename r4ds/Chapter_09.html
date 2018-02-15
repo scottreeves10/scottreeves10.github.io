@@ -492,6 +492,7 @@ table4_1999_rate</code></pre>
 
 ggplot(data = filter(table2, type == &quot;cases&quot;), mapping = aes(year, count)) +
   geom_line(aes(group = country, color = country)) +
+  # geom_line(aes(group = country), colour = &quot;grey50&quot;) + 
   geom_point(aes(color = country)) +
   labs(y = 'cases') +
   scale_x_continuous(breaks = (c(1999,2000)))</code></pre>
@@ -511,13 +512,11 @@ ggplot(data = filter(table2, type == &quot;cases&quot;), mapping = aes(year, cou
 <li><p>One variable might be spread across multiple columns.</p></li>
 <li><p>One observation might be scattered across multiple rows.</p></li>
 </ol>
-<div id="gather-and-spread" class="section level4">
-<h4><code>gather()</code> and <code>spread()</code></h4>
 <p>Typically a dataset will only suffer from one of these problems; it’ll only suffer from both if you’re really unlucky! To fix these problems, you’ll need the <span class="emph">two most important functions in tidyr</span>: <code>gather()</code> and <code>spread()</code>.</p>
-</div>
 <div id="gathering" class="section level3">
 <h3>Gathering</h3>
 <p>A common problem is a dataset where some of the column names are not names of variables, but <em>values</em> of a variable. Take <code>table4a</code>: the column names <code>1999</code> and <code>2000</code> represent values of the <code>year</code> variable, and each row represents two observations, not one.</p>
+<p><span = class"emph"> Gather when a column name is actually a value, and cell values are actually variables (column names)</span></p>
 <pre class="r"><code>table4a</code></pre>
 <pre><code>#&gt; # A tibble: 3 x 3
 #&gt;       country `1999` `2000`
@@ -531,6 +530,8 @@ ggplot(data = filter(table2, type == &quot;cases&quot;), mapping = aes(year, cou
 <li><p>The name of the variable whose values form the column names. I call that the <code>key</code>, and here it is <code>year</code>.</p></li>
 <li><p>The name of the variable whose values are spread over the cells. I call that <code>value</code>, and here it’s the number of <code>cases</code>.</p></li>
 </ul>
+<div id="gather" class="section level4">
+<h4>gather()</h4>
 <p>Together those parameters generate the call to <code>gather()</code>:</p>
 <pre class="r"><code>table4a %&gt;% 
   gather(`1999`, `2000`, key = &quot;year&quot;, value = &quot;cases&quot;)</code></pre>
@@ -579,9 +580,11 @@ left_join(tidy4a, tidy4b)</code></pre>
 #&gt; 5      Brazil  2000  80488  174504898
 #&gt; 6       China  2000 213766 1280428583</code></pre>
 </div>
+</div>
 <div id="spreading" class="section level3">
 <h3>Spreading</h3>
 <p>Spreading is the opposite of gathering. You use it when an observation is scattered across multiple rows. For example, take <code>table2</code>: an observation is a country in a year, but each observation is spread across two rows.</p>
+<p><span class="emph">Spread when values of one column are acutally variables (column names), and their corresponding values are in some other column </span></p>
 <pre class="r"><code>table2</code></pre>
 <pre><code>#&gt; # A tibble: 12 x 4
 #&gt;        country  year       type      count
@@ -603,6 +606,8 @@ left_join(tidy4a, tidy4b)</code></pre>
 <li><p>The column that contains variable names, the <code>key</code> column. Here, it’s <code>type</code>.</p></li>
 <li><p>The column that contains values forms multiple variables, the <code>value</code> column. Here it’s <code>count</code>.</p></li>
 </ul>
+<div id="spread" class="section level4">
+<h4>spread()</h4>
 <p>Once we’ve figured that out, we can use <code>spread()</code>, as shown programmatically below, and visually in Figure @ref(fig:tidy-spread).</p>
 <pre class="r"><code>spread(table2, key = type, value = count)</code></pre>
 <pre><code>#&gt; # A tibble: 6 x 4
@@ -622,6 +627,7 @@ Spreading <code>table2</code> makes it tidy
 </div>
 <p>As you might have guessed from the common <code>key</code> and <code>value</code> arguments, <code>spread()</code> and <code>gather()</code> are complements. <code>gather()</code> makes wide tables narrower and longer; <code>spread()</code> makes long tables shorter and wider.</p>
 </div>
+</div>
 <div id="exercises-1" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
@@ -635,11 +641,54 @@ stocks %&gt;%
   spread(year, return) %&gt;% 
   gather(&quot;year&quot;, &quot;return&quot;, `2015`:`2016`)</code></pre>
 <p><span class="question">(Hint: look at the variable types and think about column <em>names</em>.)</span></p>
+<p>First, to illustrate,let’s look at stocks before any other operation:</p>
+<pre class="r"><code>stocks &lt;- tibble(
+  year   = c(2015, 2015, 2016, 2016),
+  half  = c(   1,    2,     1,    2),
+  return = c(1.88, 0.59, 0.92, 0.17)
+)
+
+  stocks</code></pre>
+<pre><code>#&gt; # A tibble: 4 x 3
+#&gt;    year  half return
+#&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+#&gt; 1  2015     1   1.88
+#&gt; 2  2015     2   0.59
+#&gt; 3  2016     1   0.92
+#&gt; 4  2016     2   0.17</code></pre>
+<p>Next, let’s spread:</p>
+<pre class="r"><code>spread_stocks &lt;- stocks %&gt;% 
+  spread(year, return)
+
+spread_stocks</code></pre>
+<pre><code>#&gt; # A tibble: 2 x 3
+#&gt;    half `2015` `2016`
+#&gt; * &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+#&gt; 1     1   1.88   0.92
+#&gt; 2     2   0.59   0.17</code></pre>
+<p>Finally, let’s re-gather by year and return. If spead() and gather() were perfectly symmetrical, we should end up with a stocks tibble the same as the original.</p>
+<pre class="r"><code>gather_stocks &lt;-spread_stocks %&gt;% 
+  gather(&quot;year&quot;, &quot;return&quot;, `2015`:`2016`)
+
+gather_stocks</code></pre>
+<pre><code>#&gt; # A tibble: 4 x 3
+#&gt;    half  year return
+#&gt;   &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+#&gt; 1     1  2015   1.88
+#&gt; 2     2  2015   0.59
+#&gt; 3     1  2016   0.92
+#&gt; 4     2  2016   0.17</code></pre>
+The differences between stocks before and after spreading and gathering by year and return are:
+<ul>
+<li>order of the columns</li>
+<li>year has changed from type dbl to chr</li>
+</ul>
 <p><span class="question">Both <code>spread()</code> and <code>gather()</code> have a <code>convert</code> argument. What does it do?</span></p></li>
 <li><p><span class="question">Why does this code fail?</span></p>
 <pre class="r"><code>table4a %&gt;% 
   gather(1999, 2000, key = &quot;year&quot;, value = &quot;cases&quot;)</code></pre>
-<pre><code>#&gt; Error in inds_combine(.vars, ind_list): Position must be between 0 and n</code></pre></li>
+<pre><code>#&gt; Error in inds_combine(.vars, ind_list): Position must be between 0 and n</code></pre>
+<p>“1999” and “2000” are non-syntactic names (because they don’t start with a letter) so we have to surround them in quotes or backticks.</p></li>
 <li><p><span class="question">Why does spreading this tibble fail? How could you add a new column to fix the problem?</span></p>
 <pre class="r"><code>people &lt;- tribble(
   ~name,             ~key,    ~value,
@@ -649,13 +698,52 @@ stocks %&gt;%
   &quot;Phillip Woods&quot;,   &quot;age&quot;,       50,
   &quot;Jessica Cordero&quot;, &quot;age&quot;,       37,
   &quot;Jessica Cordero&quot;, &quot;height&quot;,   156
-)</code></pre></li>
+)</code></pre>
+<p>Spreading this tibble would fail because there are two rows for Phillip Woods’ age. (Either there are two ages for the same person, or there are two different Phillips.) A new column could be added to uniquely identify each person, rather than by name.</p></li>
 <li><p><span class="question">Tidy the simple tibble below. Do you need to spread or gather it? What are the variables?</span></p>
 <pre class="r"><code>preg &lt;- tribble(
   ~pregnant, ~male, ~female,
   &quot;yes&quot;,     NA,    10,
   &quot;no&quot;,      20,    12
-)</code></pre></li>
+)</code></pre>
+Gather to effect:
+<ul>
+<li>Gender is a variable which needs to be gathered.</li>
+<li>Male and Female are values of Gender.</li>
+</ul>
+Spread to effect:
+<ul>
+<li>Pregnant is a variable</li>
+<li>Not_Pregnant is a variable.</li>
+</ul>
+<pre class="r"><code>gathered_preg &lt;- gather(preg, male, female, key = &quot;gender&quot;, value = count)
+
+gathered_preg</code></pre>
+<pre><code>#&gt; # A tibble: 4 x 3
+#&gt;   pregnant gender count
+#&gt;      &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt;
+#&gt; 1      yes   male    NA
+#&gt; 2       no   male    20
+#&gt; 3      yes female    10
+#&gt; 4       no female    12</code></pre>
+<pre class="r"><code>new_preg &lt;- spread(gathered_preg, key = pregnant, value = count)
+
+new_preg</code></pre>
+<pre><code>#&gt; # A tibble: 2 x 3
+#&gt;   gender    no   yes
+#&gt; *  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 female    12    10
+#&gt; 2   male    20    NA</code></pre>
+<pre class="r"><code>new_preg &lt;- rename(new_preg,
+  pregnant_no   = no,
+  pregnant_yes = yes)
+
+new_preg</code></pre>
+<pre><code>#&gt; # A tibble: 2 x 3
+#&gt;   gender pregnant_no pregnant_yes
+#&gt; *  &lt;chr&gt;       &lt;dbl&gt;        &lt;dbl&gt;
+#&gt; 1 female          12           10
+#&gt; 2   male          20           NA</code></pre></li>
 </ol>
 </div>
 </div>
