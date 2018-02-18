@@ -516,7 +516,7 @@ ggplot(data = filter(table2, type == &quot;cases&quot;), mapping = aes(year, cou
 <div id="gathering" class="section level3">
 <h3>Gathering</h3>
 <p>A common problem is a dataset where some of the column names are not names of variables, but <em>values</em> of a variable. Take <code>table4a</code>: the column names <code>1999</code> and <code>2000</code> represent values of the <code>year</code> variable, and each row represents two observations, not one.</p>
-<p><span = class"emph"> Gather when one or more column name(s) is actually a value, and cell values are actually variables (column names)</span></p>
+<p><span class="emph"> Turn Columns into Rows</span></p>
 <pre class="r"><code>table4a</code></pre>
 <pre><code>#&gt; # A tibble: 3 x 3
 #&gt;       country `1999` `2000`
@@ -584,7 +584,7 @@ left_join(tidy4a, tidy4b)</code></pre>
 <div id="spreading" class="section level3">
 <h3>Spreading</h3>
 <p>Spreading is the opposite of gathering. You use it when an observation is scattered across multiple rows. For example, take <code>table2</code>: an observation is a country in a year, but each observation is spread across two rows.</p>
-<p><span class="emph">Spread when values of one column are actually variables (column names) (the key), and their corresponding values are in some other column (the value) </span></p>
+<p><span class="emph">Turn Rows into Columns</span></p>
 <pre class="r"><code>table2</code></pre>
 <pre><code>#&gt; # A tibble: 12 x 4
 #&gt;        country  year       type      count
