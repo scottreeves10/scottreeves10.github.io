@@ -449,16 +449,131 @@ library(nycflights13)</code></pre>
 <li><code>ggplot2::diamonds</code></li>
 </ol>
 <p><span class="question">(You might need to install some packages and read some documentation.)</span></p>
-<pre class="r"><code>colnames(Lahman::Batting)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>dataset</th>
+<th>key</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Lahman::Batting</code></td>
+<td>playerID, yearID, stint</td>
+</tr>
+<tr class="even">
+<td><code>babynames::babynames</code></td>
+<td>year, sex, name</td>
+</tr>
+<tr class="odd">
+<td><code>nasaweather::atmos</code></td>
+<td>lat, long, year, month</td>
+</tr>
+<tr class="even">
+<td><code>fueleconomy::vehicles</code></td>
+<td>id</td>
+</tr>
+<tr class="odd">
+<td><code>ggplot2::diamonds</code></td>
+<td>no key in original table</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>library(Lahman)
+
+colnames(Batting)</code></pre>
 <pre><code>#&gt;  [1] &quot;playerID&quot; &quot;yearID&quot;   &quot;stint&quot;    &quot;teamID&quot;   &quot;lgID&quot;     &quot;G&quot;       
 #&gt;  [7] &quot;AB&quot;       &quot;R&quot;        &quot;H&quot;        &quot;X2B&quot;      &quot;X3B&quot;      &quot;HR&quot;      
 #&gt; [13] &quot;RBI&quot;      &quot;SB&quot;       &quot;CS&quot;       &quot;BB&quot;       &quot;SO&quot;       &quot;IBB&quot;     
 #&gt; [19] &quot;HBP&quot;      &quot;SH&quot;       &quot;SF&quot;       &quot;GIDP&quot;</code></pre>
-<pre class="r"><code>Lahman::Batting %&gt;%
+<pre class="r"><code>Batting %&gt;%
   count(playerID, yearID, stint) %&gt;% 
   filter(n &gt; 1)</code></pre>
 <pre><code>#&gt; # A tibble: 0 x 4
-#&gt; # ... with 4 variables: playerID &lt;chr&gt;, yearID &lt;int&gt;, stint &lt;int&gt;, n &lt;int&gt;</code></pre></li>
+#&gt; # ... with 4 variables: playerID &lt;chr&gt;, yearID &lt;int&gt;, stint &lt;int&gt;, n &lt;int&gt;</code></pre>
+<pre class="r"><code>library(babynames)</code></pre>
+<pre class="r"><code>colnames(babynames)</code></pre>
+<pre><code>#&gt; [1] &quot;year&quot; &quot;sex&quot;  &quot;name&quot; &quot;n&quot;    &quot;prop&quot;</code></pre>
+<pre class="r"><code>head(babynames)</code></pre>
+<pre><code>#&gt; # A tibble: 6 x 5
+#&gt;    year   sex      name     n       prop
+#&gt;   &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt; &lt;int&gt;      &lt;dbl&gt;
+#&gt; 1  1880     F      Mary  7065 0.07238433
+#&gt; 2  1880     F      Anna  2604 0.02667923
+#&gt; 3  1880     F      Emma  2003 0.02052170
+#&gt; 4  1880     F Elizabeth  1939 0.01986599
+#&gt; 5  1880     F    Minnie  1746 0.01788861
+#&gt; 6  1880     F  Margaret  1578 0.01616737</code></pre>
+<pre class="r"><code>tail(babynames)</code></pre>
+<pre><code>#&gt; # A tibble: 6 x 5
+#&gt;    year   sex   name     n         prop
+#&gt;   &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;int&gt;        &lt;dbl&gt;
+#&gt; 1  2015     M   Zyah     5 2.466855e-06
+#&gt; 2  2015     M Zykell     5 2.466855e-06
+#&gt; 3  2015     M Zyking     5 2.466855e-06
+#&gt; 4  2015     M  Zykir     5 2.466855e-06
+#&gt; 5  2015     M  Zyrus     5 2.466855e-06
+#&gt; 6  2015     M   Zyus     5 2.466855e-06</code></pre>
+<p><span class="emph">Note re: the output of <code>count()</code>: If the data already already has a column named n, the output column will be called nn. If the table already has columns called n and nn then the column returned will be nnn, and so on.</span></p>
+<pre class="r"><code>babynames %&gt;%
+  count(year, sex, name) %&gt;% 
+  filter(nn &gt; 1)</code></pre>
+<pre><code>#&gt; # A tibble: 0 x 4
+#&gt; # ... with 4 variables: year &lt;dbl&gt;, sex &lt;chr&gt;, name &lt;chr&gt;, nn &lt;int&gt;</code></pre>
+<pre class="r"><code>library(nasaweather)</code></pre>
+<pre class="r"><code>colnames(atmos)</code></pre>
+<pre><code>#&gt;  [1] &quot;lat&quot;       &quot;long&quot;      &quot;year&quot;      &quot;month&quot;     &quot;surftemp&quot; 
+#&gt;  [6] &quot;temp&quot;      &quot;pressure&quot;  &quot;ozone&quot;     &quot;cloudlow&quot;  &quot;cloudmid&quot; 
+#&gt; [11] &quot;cloudhigh&quot;</code></pre>
+<pre class="r"><code>head(atmos)</code></pre>
+<pre><code>#&gt; # A tibble: 6 x 11
+#&gt;        lat   long  year month surftemp  temp pressure ozone cloudlow
+#&gt;      &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt; &lt;int&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+#&gt; 1 36.20000 -113.8  1995     1    272.7 272.1      835   304      7.5
+#&gt; 2 33.70435 -113.8  1995     1    279.5 282.2      940   304     11.5
+#&gt; 3 31.20870 -113.8  1995     1    284.7 285.2      960   298     16.5
+#&gt; 4 28.71304 -113.8  1995     1    289.3 290.7      990   276     20.5
+#&gt; 5 26.21739 -113.8  1995     1    292.2 292.7     1000   274     26.0
+#&gt; 6 23.72174 -113.8  1995     1    294.1 293.6     1000   264     30.0
+#&gt; # ... with 2 more variables: cloudmid &lt;dbl&gt;, cloudhigh &lt;dbl&gt;</code></pre>
+<pre class="r"><code>atmos %&gt;%  
+  count(lat, long, year, month) %&gt;% 
+  filter(n &gt; 1)</code></pre>
+<pre><code>#&gt; # A tibble: 0 x 5
+#&gt; # ... with 5 variables: lat &lt;dbl&gt;, long &lt;dbl&gt;, year &lt;int&gt;, month &lt;int&gt;,
+#&gt; #   n &lt;int&gt;</code></pre>
+<pre class="r"><code>library(fueleconomy)</code></pre>
+<pre class="r"><code>colnames(vehicles)</code></pre>
+<pre><code>#&gt;  [1] &quot;id&quot;    &quot;make&quot;  &quot;model&quot; &quot;year&quot;  &quot;class&quot; &quot;trans&quot; &quot;drive&quot; &quot;cyl&quot;  
+#&gt;  [9] &quot;displ&quot; &quot;fuel&quot;  &quot;hwy&quot;   &quot;cty&quot;</code></pre>
+<pre class="r"><code>head(vehicles)</code></pre>
+<pre><code>#&gt; # A tibble: 6 x 12
+#&gt;      id       make               model  year                       class
+#&gt;   &lt;int&gt;      &lt;chr&gt;               &lt;chr&gt; &lt;int&gt;                       &lt;chr&gt;
+#&gt; 1 27550 AM General   DJ Po Vehicle 2WD  1984 Special Purpose Vehicle 2WD
+#&gt; 2 28426 AM General   DJ Po Vehicle 2WD  1984 Special Purpose Vehicle 2WD
+#&gt; 3 27549 AM General    FJ8c Post Office  1984 Special Purpose Vehicle 2WD
+#&gt; 4 28425 AM General    FJ8c Post Office  1984 Special Purpose Vehicle 2WD
+#&gt; 5  1032 AM General Post Office DJ5 2WD  1985 Special Purpose Vehicle 2WD
+#&gt; 6  1033 AM General Post Office DJ8 2WD  1985 Special Purpose Vehicle 2WD
+#&gt; # ... with 7 more variables: trans &lt;chr&gt;, drive &lt;chr&gt;, cyl &lt;int&gt;,
+#&gt; #   displ &lt;dbl&gt;, fuel &lt;chr&gt;, hwy &lt;int&gt;, cty &lt;int&gt;</code></pre>
+<pre class="r"><code>vehicles %&gt;% count(id) %&gt;% filter(n &gt; 1)</code></pre>
+<pre><code>#&gt; # A tibble: 0 x 2
+#&gt; # ... with 2 variables: id &lt;int&gt;, n &lt;int&gt;</code></pre>
+<pre class="r"><code>colnames(diamonds)</code></pre>
+<pre><code>#&gt;  [1] &quot;carat&quot;   &quot;cut&quot;     &quot;color&quot;   &quot;clarity&quot; &quot;depth&quot;   &quot;table&quot;   &quot;price&quot;  
+#&gt;  [8] &quot;x&quot;       &quot;y&quot;       &quot;z&quot;</code></pre>
+<pre class="r"><code>head(diamonds)</code></pre>
+<pre><code>#&gt; # A tibble: 6 x 10
+#&gt;   carat       cut color clarity depth table price     x     y     z
+#&gt;   &lt;dbl&gt;     &lt;ord&gt; &lt;ord&gt;   &lt;ord&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1  0.23     Ideal     E     SI2  61.5    55   326  3.95  3.98  2.43
+#&gt; 2  0.21   Premium     E     SI1  59.8    61   326  3.89  3.84  2.31
+#&gt; 3  0.23      Good     E     VS1  56.9    65   327  4.05  4.07  2.31
+#&gt; 4  0.29   Premium     I     VS2  62.4    58   334  4.20  4.23  2.63
+#&gt; 5  0.31      Good     J     SI2  63.3    58   335  4.34  4.35  2.75
+#&gt; 6  0.24 Very Good     J    VVS2  62.8    57   336  3.94  3.96  2.48</code></pre></li>
 <li><p><span class="question">Draw a diagram illustrating the connections between the <code>Batting</code>,<code>Master</code>, and <code>Salaries</code> tables in the Lahman package. Draw another diagram that shows the relationship between <code>Master</code>, <code>Managers</code>, <code>AwardsManagers</code>.</p>
 <p><span class="question">How would you characterise the relationship between the <code>Batting</code>,<code>Pitching</code>, and <code>Fielding</code> tables?</span></p></li>
 </ol>
