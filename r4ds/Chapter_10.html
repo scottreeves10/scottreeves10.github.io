@@ -357,20 +357,20 @@ library(nycflights13)</code></pre>
 #&gt; [11] &quot;wind_gust&quot;  &quot;precip&quot;     &quot;pressure&quot;   &quot;visib&quot;      &quot;time_hour&quot;</code></pre>
 <p>Destinations</p></li>
 <li><p><span class="question">We know that some days of the year are “special”, and fewer people than usual fly on them. How might you represent that data as a data frame? What would be the primary keys of that table? How would it connect to the existing tables?</span></p>
-<p>New table <code>special_days</code> with passenger_volume, including and connected by year, month day. More granularly it could include and be conneted by faa in airports, etc.</p></li>
+<p>That data may be rpresented as a data frame with a new table perhaps called <code>special_days</code> with passenger_volume, including and connected by year, month day. More granularly it could include and be conneted by faa in airports, etc.</p></li>
 </ol>
 </div>
 </div>
 <div id="keys" class="section level2">
 <h2>Keys</h2>
-<p>The variables used to connect each pair of tables are called <strong>keys</strong>. A key is a variable (or set of variables) that uniquely identifies an observation. In simple cases, a single variable is sufficient to identify an observation. For example, each plane is uniquely identified by its <code>tailnum</code>. In other cases, multiple variables may be needed. For example, to identify an observation in <code>weather</code> you need five variables: <code>year</code>, <code>month</code>, <code>day</code>, <code>hour</code>, and <code>origin</code>.</p>
+<p>The variables used to connect each pair of tables are called <strong>keys</strong>. A key is a variable (or set of variables) that <span class="emph">uniquely identifies an observation</span>. In simple cases, a single variable is sufficient to identify an observation. For example, each plane is uniquely identified by its <code>tailnum</code>. In other cases, multiple variables may be needed. For example, to identify an observation in <code>weather</code> you need five variables: <code>year</code>, <code>month</code>, <code>day</code>, <code>hour</code>, and <code>origin</code>.</p>
 <p>There are two types of keys:</p>
 <ul>
 <li><p>A <strong>primary key</strong> uniquely identifies an observation in its own table. For example, <code>planes$tailnum</code> is a primary key because it uniquely identifies each plane in the <code>planes</code> table.</p></li>
 <li><p>A <strong>foreign key</strong> uniquely identifies an observation in another table. For example, the <code>flights$tailnum</code> is a foreign key because it appears in the <code>flights</code> table where it matches each flight to a unique plane.</p></li>
 </ul>
 <p>A variable can be both a primary key <em>and</em> a foreign key. For example, <code>origin</code> is part of the <code>weather</code> primary key, and is also a foreign key for the <code>airport</code> table.</p>
-<p>Once you’ve identified the primary keys in your tables, it’s good practice to verify that they do indeed uniquely identify each observation. One way to do that is to <code>count()</code> the primary keys and look for entries where <code>n</code> is greater than one:</p>
+<p>Once you’ve identified the primary keys in your tables, <span class="emph">it’s good practice to verify that they do indeed uniquely identify each observation</span>. One way to do that is to <code>count()</code> the primary keys and look for entries where <code>n</code> is greater than one:</p>
 <pre class="r"><code>planes %&gt;% 
   count(tailnum) %&gt;% 
   filter(n &gt; 1)</code></pre>
@@ -417,13 +417,30 @@ library(nycflights13)</code></pre>
 #&gt;  9  2013     1     1  N13538     3
 #&gt; 10  2013     1     1  N13566     3
 #&gt; # ... with 64,918 more rows</code></pre>
-<p>When starting to work with this data, I had naively assumed that each flight number would be only used once per day: that would make it much easier to communicate problems with a specific flight. Unfortunately that is not the case! If a table lacks a primary key, it’s sometimes useful to add one with <code>mutate()</code> and <code>row_number()</code>. That makes it easier to match observations if you’ve done some filtering and want to check back in with the original data. This is called a <strong>surrogate key</strong>.</p>
+<p>When starting to work with this data, I had naively assumed that each flight number would be only used once per day: that would make it much easier to communicate problems with a specific flight. Unfortunately that is not the case! <span class="emph">If a table lacks a primary key, it’s sometimes useful to add one with <code>mutate()</code> and <code>row_number()</code></span>. That makes it easier to match observations if you’ve done some filtering and want to check back in with the original data. This is called a <strong>surrogate key</strong>.</p>
 <p>A primary key and the corresponding foreign key in another table form a <strong>relation</strong>. Relations are typically one-to-many. For example, each flight has one plane, but each plane has many flights. In other data, you’ll occasionally see a 1-to-1 relationship. You can think of this as a special case of 1-to-many. You can model many-to-many relations with a many-to-1 relation plus a 1-to-many relation. For example, in this data there’s a many-to-many relationship between airlines and airports: each airline flies to many airports; each airport hosts many airlines.</p>
 <div id="exercises-1" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
-<li><p>Add a surrogate key to <code>flights</code>.</p></li>
-<li><p>Identify the keys in the following datasets</p>
+<li><p><span class="question">Add a surrogate key to <code>flights</code>.</span></p>
+<pre class="r"><code>flights %&gt;% 
+  mutate(uid = row_number()) %&gt;%      # surrogate key
+  select(uid, everything()) %&gt;%       # show results...
+  head()</code></pre>
+<pre><code>#&gt; # A tibble: 6 x 20
+#&gt;     uid  year month   day dep_time sched_dep_time dep_delay arr_time
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
+#&gt; 1     1  2013     1     1      517            515         2      830
+#&gt; 2     2  2013     1     1      533            529         4      850
+#&gt; 3     3  2013     1     1      542            540         2      923
+#&gt; 4     4  2013     1     1      544            545        -1     1004
+#&gt; 5     5  2013     1     1      554            600        -6      812
+#&gt; 6     6  2013     1     1      554            558        -4      740
+#&gt; # ... with 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+#&gt; #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
+#&gt; #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
+#&gt; #   time_hour &lt;dttm&gt;</code></pre></li>
+<li><p><span class="question">Identify the keys in the following datasets</span></p>
 <ol style="list-style-type: decimal">
 <li><code>Lahman::Batting</code>,</li>
 <li><code>babynames::babynames</code></li>
@@ -431,9 +448,19 @@ library(nycflights13)</code></pre>
 <li><code>fueleconomy::vehicles</code></li>
 <li><code>ggplot2::diamonds</code></li>
 </ol>
-<p>(You might need to install some packages and read some documentation.)</p></li>
-<li><p>Draw a diagram illustrating the connections between the <code>Batting</code>, <code>Master</code>, and <code>Salaries</code> tables in the Lahman package. Draw another diagram that shows the relationship between <code>Master</code>, <code>Managers</code>, <code>AwardsManagers</code>.</p>
-<p>How would you characterise the relationship between the <code>Batting</code>, <code>Pitching</code>, and <code>Fielding</code> tables?</p></li>
+<p><span class="question">(You might need to install some packages and read some documentation.)</span></p>
+<pre class="r"><code>colnames(Lahman::Batting)</code></pre>
+<pre><code>#&gt;  [1] &quot;playerID&quot; &quot;yearID&quot;   &quot;stint&quot;    &quot;teamID&quot;   &quot;lgID&quot;     &quot;G&quot;       
+#&gt;  [7] &quot;AB&quot;       &quot;R&quot;        &quot;H&quot;        &quot;X2B&quot;      &quot;X3B&quot;      &quot;HR&quot;      
+#&gt; [13] &quot;RBI&quot;      &quot;SB&quot;       &quot;CS&quot;       &quot;BB&quot;       &quot;SO&quot;       &quot;IBB&quot;     
+#&gt; [19] &quot;HBP&quot;      &quot;SH&quot;       &quot;SF&quot;       &quot;GIDP&quot;</code></pre>
+<pre class="r"><code>Lahman::Batting %&gt;%
+  count(playerID, yearID, stint) %&gt;% 
+  filter(n &gt; 1)</code></pre>
+<pre><code>#&gt; # A tibble: 0 x 4
+#&gt; # ... with 4 variables: playerID &lt;chr&gt;, yearID &lt;int&gt;, stint &lt;int&gt;, n &lt;int&gt;</code></pre></li>
+<li><p><span class="question">Draw a diagram illustrating the connections between the <code>Batting</code>,<code>Master</code>, and <code>Salaries</code> tables in the Lahman package. Draw another diagram that shows the relationship between <code>Master</code>, <code>Managers</code>, <code>AwardsManagers</code>.</p>
+<p><span class="question">How would you characterise the relationship between the <code>Batting</code>,<code>Pitching</code>, and <code>Fielding</code> tables?</span></p></li>
 </ol>
 </div>
 </div>
