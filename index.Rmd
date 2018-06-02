@@ -12,16 +12,21 @@ library(knitr)
 library(kableExtra)
 ```
 
-***
+
 
 #### R for Data Science
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+
 r4ds.table <- read.csv("r4ds.table.csv")
 
 kable(r4ds.table, "html") %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", full_width = FALSE, position = "left")) %>% 
   column_spec(1:3, width = "30px")
+
   
 ```
 
+#### tmap and leaflet
+
+[usa](.maps/usa.html)
