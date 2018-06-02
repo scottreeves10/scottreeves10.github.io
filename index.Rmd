@@ -29,4 +29,4 @@ kable(r4ds.table, "html") %>%
 
 #### tmap and leaflet
 
-[usa](.maps/usa.html)
+[usa](./maps/usa.html)
